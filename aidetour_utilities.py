@@ -128,7 +128,6 @@ def read_config_ini():
     logger.info(f"read_config_ini: config.ini: host={host} port={port}.")
     return host, port
 
-
 # Function to load models from models.ini and construct MODELS_DATA
 def load_models_data():
     config = configparser.ConfigParser()

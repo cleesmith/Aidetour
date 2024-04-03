@@ -20,6 +20,11 @@
 # pyinstaller --onefile Aidetour.py
 # pyinstaller Aidetour.spec
 #
+# Mac:
+# cd Aidetour
+# conda activate Aidetour
+# python Aidetour.py
+# 
 # Windows:
 # cd Aidetour
 # python -m venv Aidetour
@@ -111,6 +116,14 @@ def run_cli_version():
     logging.info("Starting Aidetour in CLI mode...")
     aidetour_api_handler.run_flask_app(HOST, PORT, ANTHROPIC_API_KEY)
 
+def ensure_config_directory():
+    home_dir = os.path.expanduser('~')
+    config_dir = os.path.join(home_dir, 'Aidetour')
+    if not os.path.exists(config_dir):
+        os.makedirs(config_dir)
+    return config_dir
+
+
 def signal_handler(sig, frame):
     print("\nKeyboard interrupt received. Shutting down...")
     logger.info("Keyboard interrupt received. Shutting down...")
@@ -130,6 +143,11 @@ if __name__ == '__main__':
     aidetour_logging.setup_logging()
     logger = aidetour_logging.get_logger(__name__)
     logger.info("Starting Aidetour...")
+
+
+    config_dir = ensure_config_directory()
+    print(f"config_dir={config_dir}")
+
 
     config_files_ok = aidetour_utilities.check_create_config_files()
     if not config_files_ok:

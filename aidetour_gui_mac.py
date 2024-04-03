@@ -21,7 +21,8 @@ logger = logging.getLogger('aidetour_gui_mac')
 
 class Aidetour(rumps.App):
     def __init__(self, host, port, api_key):
-        super(Aidetour, self).__init__("Aidetour", icon='Icon_300x200.png', menu=["Info", "Models", "Logs", "Exit"], quit_button=None)
+        super(Aidetour, self).__init__("Aidetour", menu=["Info", "Models", "Logs", "Exit"], quit_button=None)
+        # super(Aidetour, self).__init__("Aidetour", icon='Icon_300x200.png', menu=["Info", "Models", "Logs", "Exit"], quit_button=None)
         rumps.App.quit_button = None
         self.host = host
         self.port = port

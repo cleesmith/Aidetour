@@ -1,0 +1,7 @@
+python-dotenv
+rumps
+wxPython
+requests
+Flask
+Flask-CORS
+anthropic

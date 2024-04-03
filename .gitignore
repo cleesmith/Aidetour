@@ -1,0 +1,12 @@
+# Environment variables to hide api key
+.env
+
+# Log files
+*.log
+
+# macOS folder attributes
+.DS_Store
+
+git_setup.txt
+config.ini
+models.ini

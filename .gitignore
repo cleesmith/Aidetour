@@ -10,3 +10,10 @@
 git_setup.txt
 config.ini
 models.ini
+
+# ignore PyInstaller stuff:
+build/
+dist/
+*.spec
+__pycache__/
+

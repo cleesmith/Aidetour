@@ -17,7 +17,7 @@
 # 
 # PyInstaller works great, so:
 # pip install pyinstaller
-# pyinstaller --onefile --windowed Aidetour.py
+# pyinstaller --onefile Aidetour.py
 # pyinstaller Aidetour.spec
 #
 # Windows:

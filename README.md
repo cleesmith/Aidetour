@@ -72,17 +72,19 @@ The application will start the Flask server and listen for incoming requests.
 
 ## Contributing
 
-Contributions are welcome! If you find any issues or have suggestions for improvements, please open an issue or submit a pull request.
+Contributions are welcome! If you find any issues or have suggestions for improvements, 
+please open an issue or submit a pull request.
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more information.
+This project is licensed under the MIT License. See the LICENSE file for more information.
 
 ## Acknowledgements
 
-- [OpenAI API](https://openai.com/)
-- [Anthropic Claude API](https://www.anthropic.com/)
+- [Python](https://www.python.org/)
 - [Flask](https://flask.palletsprojects.com/)
 - [Rumps](https://github.com/jaredks/rumps)
 - [wxPython](https://www.wxpython.org/)
+- [Anthropic Claude API](https://www.anthropic.com/)
+- [OpenAI API](https://openai.com/)
 

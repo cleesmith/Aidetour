@@ -1,4 +1,3 @@
-```markdown
 # Aidetour
 
 Aidetour is a Python application that acts as a middleman between the OpenAI API 
@@ -86,5 +85,4 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 - [Flask](https://flask.palletsprojects.com/)
 - [Rumps](https://github.com/jaredks/rumps)
 - [wxPython](https://www.wxpython.org/)
-```
 

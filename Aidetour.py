@@ -58,14 +58,11 @@ from dotenv import load_dotenv
 
 # Aidetour modules:
 import aidetour_logging
-import aidetour_utilities
 import aidetour_api_handler
+import aidetour_utilities
+from aidetour_utilities import APP_NAME, APP_LOGO
+from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
 
-
-APP_NAME = "Aidetour"
-ANTHROPIC_API_KEY = None # uppercase to indicate it's an environment variable
-HOST = None
-PORT = None
 
 def check_api_key():
     # required to assign a new value to global value:
@@ -108,21 +105,26 @@ def run_windows_version():
 
 def run_mac_version():
     import aidetour_gui_mac
+    from aidetour_utilities import APP_NAME, APP_LOGO
+    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
     logging.info("Mac detected...")
+    print("run_mac_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
     app = aidetour_gui_mac.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
     app.run()
 
 def run_cli_version():
-    logging.info("Starting Aidetour in CLI mode...")
+    from aidetour_utilities import APP_NAME, APP_LOGO
+    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+    logging.info(f"Starting {APP_NAME} in CLI mode...")
+    print("run_cli_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
     aidetour_api_handler.run_flask_app(HOST, PORT, ANTHROPIC_API_KEY)
 
 def ensure_config_directory():
     home_dir = os.path.expanduser('~')
-    config_dir = os.path.join(home_dir, 'Aidetour')
+    config_dir = os.path.join(home_dir, APP_NAME)
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
     return config_dir
-
 
 def signal_handler(sig, frame):
     print("\nKeyboard interrupt received. Shutting down...")
@@ -136,18 +138,15 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     # lots and lots of user hand holding...
-    parser = argparse.ArgumentParser(description="Aidetour with Mac/Windows GUI or CLI terminal mode.")
-    parser.add_argument('--cli', action='store_true', help='run Aidetour in CLI mode (no GUI).')
+    parser = argparse.ArgumentParser(description=f"{APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
+    parser.add_argument('--cli', action='store_true', help=f"run {APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
     aidetour_logging.setup_logging()
     logger = aidetour_logging.get_logger(__name__)
-    logger.info("Starting Aidetour...")
-
+    logger.info(f"Starting {APP_NAME}...")
 
     config_dir = ensure_config_directory()
-    print(f"config_dir={config_dir}")
-
 
     config_files_ok = aidetour_utilities.check_create_config_files()
     if not config_files_ok:
@@ -155,9 +154,9 @@ if __name__ == '__main__':
         print("Configuration files were created or updated. Please change and review them before running Aidetour again.")
         sys.exit(1)
 
-    HOST, PORT = aidetour_utilities.read_config_ini()
+    aidetour_utilities.HOST, aidetour_utilities.PORT = aidetour_utilities.read_config_ini()
 
-    ANTHROPIC_API_KEY = check_api_key()
+    aidetour_utilities.ANTHROPIC_API_KEY = check_api_key()
 
     models = aidetour_utilities.list_models()
     logger.info(models)
@@ -165,8 +164,10 @@ if __name__ == '__main__':
     if args.cli:
         run_cli_version()
     elif sys.platform.startswith('darwin'):
+        aidetour_utilities.show_splash_screen()
         run_mac_version()
     elif sys.platform.startswith('win'):
+        aidetour_utilities.show_splash_screen()
         run_windows_version()
     else:
         logger.info("GUI mode is only supported on Windows and macOS, so now running in CLI mode...")

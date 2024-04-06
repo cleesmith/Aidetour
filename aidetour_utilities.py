@@ -1,16 +1,54 @@
 # aidetour_utilities.py
 
 import os
+import socket
 import sys
 import logging
 import configparser
+import subprocess
 import tkinter as tk
 from tkinter import messagebox
 
 import aidetour_logging
 
+APP_NAME = "Aidetour"
+APP_LOGO = "Aidetour.png"
+APP_SPLASH = 'aidetour_splash.py'
+HOST = None
+PORT = None
+ANTHROPIC_API_KEY = None
+
 
 logger = logging.getLogger('aidetour_utilities')
+
+
+def is_port_in_use(host, port):
+    # note: these 3 host values all catch the error:
+    # host = 'localhost'
+    # host = '0.0.0.0'
+    # host = '127.0.0.1'
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex((host, port)) == 0
+
+def show_splash_screen():
+    welcome_message = '''
+------------------------------------------------------------------------------
+Aidetour is an app that acts as a middleman between the OpenAI API and 
+the Anthropic Claude API. When Aidetour receives a request intended for the 
+OpenAI system, it translates that request into a proper Anthropic API request.
+The translated request is sent to the Anthropic API then waits for a response. 
+Once the response is received, Aidetour converts that back into an OpenAI API
+formatted streamed response.
+------------------------------------------------------------------------------
+1. Configure your Anthropic API key in .env file.
+2. Configure your host and port in config.ini file.
+3. Configure the Claude 3 models available from Anthropic.
+'''
+    welcome_message = '''\n
+                    Aidetour\n
+Anthropic API  <====> OpenAI API\n
+'''
+    subprocess.Popen(['python', APP_SPLASH, APP_LOGO, welcome_message])
 
 def show_custom_message(title, message):
     # Create a root window

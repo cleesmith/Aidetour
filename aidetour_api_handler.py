@@ -2,6 +2,8 @@
 
 import os
 import sys
+import socket
+import errno
 import subprocess
 import logging
 import signal
@@ -15,9 +17,28 @@ import subprocess
 import threading
 from datetime import datetime, timezone
 
+# April 2024: Aidetour now uses Waitress to serve the Flask app; Claude 3 Opus said this:
+"""
+Using Flask and Waitress together is a sensible choice for web application development and deployment.
+Flask is a lightweight, flexible, and developer-friendly web framework that simplifies the process of 
+building web applications. It provides useful features for development, such as a built-in server, 
+debugger, and easy extensibility.
+Waitress is a production-grade WSGI server that is designed to serve web applications in a reliable 
+and efficient manner. It is platform-agnostic, requires minimal configuration, and can handle multiple 
+simultaneous connections. [cls: this is not needed by Aidetour, as it's an API server for one]
+By using Flask for development and Waitress for production, you can leverage the strengths of both 
+tools. Flask allows for rapid and flexible application development, while Waitress ensures reliable 
+and efficient serving of the application in a production environment.
+This combination is particularly useful for projects that require cross-platform compatibility, 
+as Waitress can run on various operating systems, including Windows.
+Overall, using Flask and Waitress together provides a smooth development-to-production pipeline 
+and adheres to the principle of using the best tool for each job.
+"""
 # API Flask Anthropic related:
 # pip install requests
 import requests
+# pip install waitress
+from waitress import serve
 # pip install Flask Flask-CORS
 from flask import Flask, Response, jsonify, request, stream_with_context, make_response
 from flask_cors import CORS
@@ -41,7 +62,6 @@ ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
 MODELS_DATA = None
 
-
 flask_app = Flask(__name__)
 # Enable CORS for all routes and origins
 CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
@@ -50,12 +70,21 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # flask_app.logger.setLevel(logging.DEBUG)
 # logging.getLogger('flask_cors').level = logging.DEBUG
 
-def run_flask_app(host, port, key):
-	global ANTHROPIC_API_KEY
-	ANTHROPIC_API_KEY = key
-	global MODELS_DATA
-	MODELS_DATA = aidetour_utilities.load_models_data()
-	flask_app.run(host=host, port=port, debug=False, use_reloader=False)
+def run_flask_app(host, port, key, status_dict):
+    global ANTHROPIC_API_KEY
+    ANTHROPIC_API_KEY = key
+    global MODELS_DATA
+    MODELS_DATA = aidetour_utilities.load_models_data()
+    try:
+        serve(flask_app, host=host, port=port)
+    except OSError as e:
+        if e.errno == errno.EADDRINUSE:
+            print(f"Error: Address {host}:{port} is already in use.")
+            status_dict['error'] = True
+        else:
+            status_dict['exception'] = e
+    except Exception as e:  # Catch all other exceptions
+        status_dict['exception'] = e
 
 def generate_unique_string():
     unique_id = str(uuid.uuid4())

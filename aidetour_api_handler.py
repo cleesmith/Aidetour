@@ -79,6 +79,7 @@ def run_flask_app(host, port, key, status_dict):
     global MODELS_DATA
     MODELS_DATA = aidetour_utilities.load_models_data()
     try:
+        print("run_flask_app=", host, port)
         serve(flask_app, host=host, port=port)
         # server = create_server(flask_app, host=host, port=port)
         # server.run()
@@ -168,7 +169,8 @@ def handle_exception(e):
 @flask_app.route('/v1/shutdown', methods=['POST'])
 def shutdown():
     logger.info("Received shutdown request")
-    # task.interrupt_main()
+    os.environ['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
+    os.execl(sys.executable, sys.executable, *sys.argv)
     return 'Server shutting down...'
 
 @flask_app.route('/v1/models', methods=['OPTIONS'])

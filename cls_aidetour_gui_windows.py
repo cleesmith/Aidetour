@@ -4,8 +4,12 @@ import os
 import sys
 import subprocess
 import logging
-import time
+import threading
+# pip install requests
 import requests
+ 
+# wxPython systray GUI for Windows related:
+# pip install wxPython
 import wx
 import wx.adv
 from wx import svg
@@ -17,7 +21,12 @@ import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
 from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
 
+
+# cls: used to debug exit/quit behavior:
+# rumps.debug_mode(True)
+
 logger = logging.getLogger('aidetour_gui_windows')
+
 
 class SplitImageDialog(wx.Dialog):
     def __init__(self, parent, title, message, image_path, button_label="OK"):
@@ -46,6 +55,7 @@ class SplitImageDialog(wx.Dialog):
         mainSizer.Fit(self)
         self.Layout()
 
+
 class TrayIcon(wx.adv.TaskBarIcon):
     def __init__(self, frame, host, port, api_key):
         super().__init__()
@@ -53,15 +63,34 @@ class TrayIcon(wx.adv.TaskBarIcon):
         self.host = host
         self.port = port
         self.api_key = api_key
-        self.server_process = None
+        # icon_path = aidetour_utilities.resource_path("Icon_300x200.ico")
         icon_path = aidetour_utilities.resource_path("Aidetour.png")
         self.SetIcon(wx.Icon(icon_path), "Aidetour")
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
 
+
+        # self.abort_app()
+
+        # let's check here first for host+port in use, but also
+        # double check this again within def init_flask_server (if possible):
         if aidetour_utilities.is_port_in_use(host, port):
             self.abort_app()
         else:
-            self.start_server()
+            self.init_flask_server()
+
+    def init_flask_server(self):
+        server_status = {'error': False, 'exception': None}
+        self.flask_thread = threading.Thread(target=aidetour_api_handler.run_flask_app, 
+            args=(self.host, self.port, self.api_key, server_status), 
+            daemon=True)
+        self.flask_thread.start()
+        # cls: does not work on Mac:
+        # flask_thread.join()  # Wait for the thread to complete = this blocks
+        # if server_status['error']:
+        #     self.abort_app()
+        # elif server_status['exception'] is not None:
+        #     # Handle or log the exception as needed
+        #     print(f"Exception occurred: {server_status['exception']}")
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
@@ -72,12 +101,8 @@ class TrayIcon(wx.adv.TaskBarIcon):
         logs_item = menu.Append(wx.ID_ANY, 'Logs')
         self.Bind(wx.EVT_MENU, self.on_logs, logs_item)
         menu.AppendSeparator()
-        start_item = server_menu.Append(wx.ID_ANY, 'Start Server')
-        self.Bind(wx.EVT_MENU, self.on_start_server, start_item)
-        shutdown_item = menu.Append(wx.ID_ANY, 'Stop Server')
+        shutdown_item = menu.Append(wx.ID_ANY, 'Shutdown Server')
         self.Bind(wx.EVT_MENU, self.on_shutdown, shutdown_item)
-        restart_item = menu.Append(wx.ID_ANY, 'Restart Server')
-        self.Bind(wx.EVT_MENU, self.on_restart_server, restart_item)
         menu.AppendSeparator()
         exit_item = menu.Append(wx.ID_EXIT, 'Exit')
         self.Bind(wx.EVT_MENU, self.on_exit, exit_item)
@@ -88,6 +113,11 @@ class TrayIcon(wx.adv.TaskBarIcon):
         pass  
 
     def on_info(self, event):
+        # dialog = SplitImageDialog(None, "Aidetour", f"LISTENING ON:\n\nhttp://{self.host}:{self.port}\n\n", aidetour_utilities.resource_path("icon_300x200.png"))
+        # message = f"LISTENING ON:\n\nhttp://{self.host}:{self.port}\n\n"
+        # dialog = wx.MessageDialog(None, message, "Aidetour", wx.OK|wx.ICON_INFORMATION)
+        # dialog.ShowModal()
+        # dialog.Destroy()
         afile = "config.ini"
         afile = "requirements.txt"
         file_path = aidetour_utilities.resource_path(afile)
@@ -101,6 +131,7 @@ class TrayIcon(wx.adv.TaskBarIcon):
     def on_models(self, event):
         models = aidetour_utilities.list_models()
         dialog = SplitImageDialog(None, "Aidetour", models, aidetour_utilities.resource_path("Aidetour.png"))
+        # dialog = wx.MessageDialog(None, models, "Aidetour", wx.OK|wx.ICON_INFORMATION)
         dialog.ShowModal()
         dialog.Destroy()
 
@@ -113,19 +144,16 @@ class TrayIcon(wx.adv.TaskBarIcon):
             logger.error(f"Unexpected error occurred while opening Aidetour.log file: {e}", exc_info=True)
             wx.LogError(f"Unexpected error occurred while opening the {afile} file.")
 
-
-    def on_start_server(self, event):
-        if not self.server_process:
-            self.server_process = self.start_server()
-
     def on_shutdown(self, event):
-        if self.server_process:
-            self.stop_server(self.server_process)
-            self.server_process = None
-
-    def on_restart_server(self, event):
-        if self.server_process:
-            self.server_process = self.restart_server(self.server_process)
+        # Send a shutdown request to the server
+        response = requests.post(f'http://{self.host}:{self.port}/v1/shutdown')
+        if response.status_code == 200:
+            # while self.server_status['running']:
+            #     time.sleep(1)  # Wait for the server to stop running
+            self.flask_thread = None
+            print("Flask server has stopped")
+        else:
+            print(f"Failed to stop the server. Status code: {response.status_code}")
 
     def abort_app(self):
         logger.info(f"ERROR: http://{self.host}:{self.port} is already in use!")
@@ -146,40 +174,21 @@ class TrayIcon(wx.adv.TaskBarIcon):
         self.on_exit(None)
         sys.exit(1)  # Exit the application with an error status code.
 
-    def start_server(self):
-        self.server_process = subprocess.Popen(['python', 'aidetour_api_handler.py',
-                                                self.host, str(self.port), self.api_key])
-        print(f"Server started on {self.host}:{self.port}")
-
-    def stop_server(self, server_process):
-        if sys.platform == 'win32':
-            server_process.terminate()
-        else:
-            server_process.terminate()
-            server_process.wait()
-        print("Server stopped.")
-
-    def restart_server(self, server_process):
-        self.stop_server(server_process)
-        time.sleep(1)
-        new_server_process = self.start_server()
-        return new_server_process
-
     def on_exit(self, event=None):
-        if self.server_process:
-            self.stop_server(self.server_process)
-            self.server_process = None
-
+        # Remove the tray icon to avoid leaving a phantom icon in the system tray
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             self.tray_icon.RemoveIcon()
             self.tray_icon.Destroy()
             self.tray_icon = None
 
+        # Close the main application window, if it exists
         if hasattr(self, 'frame') and self.frame is not None:
             self.frame.Destroy()
             self.frame = None
 
+        # Explicitly terminate the application's main loop
         wx.GetApp().ExitMainLoop()
+
 
 class Aidetour(wx.App):
     def __init__(self, host, port, api_key, redirect=False):

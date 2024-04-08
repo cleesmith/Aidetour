@@ -1,71 +1,66 @@
 import wx
-import threading
+import subprocess
 import time
+import sys
 
 class MyFrame(wx.Frame):
     def __init__(self):
-        super().__init__(parent=None, title='Waitress/Flask Server Control')
-        panel = wx.Panel(self)
+        super().__init__(parent=None, title='Server Control')
+        self.server_process = None
+        self.host = '127.0.0.1'
+        self.port = 5600
+        self.api_key = 'your_api_key'
+        self.server_status = 'status'
+        self.init_ui()
 
-        # Create a menu bar
+    def init_ui(self):
         menubar = wx.MenuBar()
         server_menu = wx.Menu()
 
-        # Add menu items
-        self.start_item = server_menu.Append(wx.ID_ANY, 'Start Server')
-        self.stop_item = server_menu.Append(wx.ID_ANY, 'Stop Server')
-        self.restart_item = server_menu.Append(wx.ID_ANY, 'Restart Server')
-        server_menu.AppendSeparator()
-        self.logs_item = server_menu.Append(wx.ID_ANY, 'Logs')
+        start_item = server_menu.Append(wx.ID_ANY, 'Start Server')
+        self.Bind(wx.EVT_MENU, self.on_start_server, start_item)
 
-        # Bind menu events
-        self.Bind(wx.EVT_MENU, self.on_start, self.start_item)
-        self.Bind(wx.EVT_MENU, self.on_stop, self.stop_item)
-        self.Bind(wx.EVT_MENU, self.on_restart, self.restart_item)
-        self.Bind(wx.EVT_MENU, self.on_logs, self.logs_item)
+        stop_item = server_menu.Append(wx.ID_ANY, 'Stop Server')
+        self.Bind(wx.EVT_MENU, self.on_stop_server, stop_item)
+
+        restart_item = server_menu.Append(wx.ID_ANY, 'Restart Server')
+        self.Bind(wx.EVT_MENU, self.on_restart_server, restart_item)
 
         menubar.Append(server_menu, '&Server')
         self.SetMenuBar(menubar)
 
-        self.server_status = {'running': False}
-        self.flask_thread = None
+    def on_start_server(self, event):
+        if not self.server_process:
+            self.server_process = self.start_server()
+
+    def on_stop_server(self, event):
+        if self.server_process:
+            self.stop_server(self.server_process)
+            self.server_process = None
+
+    def on_restart_server(self, event):
+        if self.server_process:
+            self.server_process = self.restart_server(self.server_process)
 
     def start_server(self):
-        self.server_status['running'] = True
-        self.flask_thread = threading.Thread(target=aidetour_api_handler.run_flask_app,
-                                             args=(self.host, self.port, self.api_key, self.server_status),
-                                             daemon=True)
-        self.flask_thread.start()
+        server_process = subprocess.Popen(['python', 'run_server.py',
+                                           self.host, str(self.port), self.api_key, self.server_status])
+        print(f"Server started on {self.host}:{self.port}")
+        return server_process
 
-    def stop_server(self):
-        # Send a shutdown request to the server
-        response = requests.post(f'http://{self.host}:{self.port}/v1/shutdown')
-        if response.status_code == 200:
-            while self.server_status['running']:
-                time.sleep(1)  # Wait for the server to stop running
-            self.flask_thread = None
-            print("Flask server has stopped")
+    def stop_server(self, server_process):
+        if sys.platform == 'win32':
+            server_process.terminate()
         else:
-            print(f"Failed to stop the server. Status code: {response.status_code}")
+            server_process.terminate()
+            server_process.wait()
+        print("Server stopped.")
 
-    def on_start(self, event):
-        if not self.server_status['running']:
-            self.start_server()
-            print("Flask server started")
-
-    def on_stop(self, event):
-        if self.server_status['running']:
-            self.stop_server()
-
-    def on_restart(self, event):
-        if self.server_status['running']:
-            self.stop_server()
-        self.start_server()
-        print("Flask server restarted")
-
-    def on_logs(self, event):
-        # Implement the logic to display logs
-        print("Displaying logs...")
+    def restart_server(self, server_process):
+        self.stop_server(server_process)
+        time.sleep(1)
+        new_server_process = self.start_server()
+        return new_server_process
 
 if __name__ == '__main__':
     app = wx.App()

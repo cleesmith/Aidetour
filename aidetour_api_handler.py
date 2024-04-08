@@ -15,6 +15,7 @@ import json
 import configparser
 import subprocess
 import threading
+from threading import Event
 from datetime import datetime, timezone
 
 # April 2024: Aidetour now uses Waitress to serve the Flask app; Claude 3 Opus said this:
@@ -38,7 +39,7 @@ and adheres to the principle of using the best tool for each job.
 # pip install requests
 import requests
 # pip install waitress
-from waitress import serve
+from waitress import serve, task, create_server
 # pip install Flask Flask-CORS
 from flask import Flask, Response, jsonify, request, stream_with_context, make_response
 from flask_cors import CORS
@@ -62,6 +63,7 @@ ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
 MODELS_DATA = None
 
+
 flask_app = Flask(__name__)
 # Enable CORS for all routes and origins
 CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
@@ -70,6 +72,7 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # flask_app.logger.setLevel(logging.DEBUG)
 # logging.getLogger('flask_cors').level = logging.DEBUG
 
+
 def run_flask_app(host, port, key, status_dict):
     global ANTHROPIC_API_KEY
     ANTHROPIC_API_KEY = key
@@ -77,6 +80,8 @@ def run_flask_app(host, port, key, status_dict):
     MODELS_DATA = aidetour_utilities.load_models_data()
     try:
         serve(flask_app, host=host, port=port)
+        # server = create_server(flask_app, host=host, port=port)
+        # server.run()
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
             print(f"Error: Address {host}:{port} is already in use.")
@@ -85,6 +90,8 @@ def run_flask_app(host, port, key, status_dict):
             status_dict['exception'] = e
     except Exception as e:  # Catch all other exceptions
         status_dict['exception'] = e
+    finally:
+        status_dict['running'] = False
 
 def generate_unique_string():
     unique_id = str(uuid.uuid4())
@@ -157,6 +164,12 @@ def handle_exception(e):
         "type": "InternalServerError",
         "message": "An unexpected error has occurred.",
     }), 500
+
+@flask_app.route('/v1/shutdown', methods=['POST'])
+def shutdown():
+    logger.info("Received shutdown request")
+    # task.interrupt_main()
+    return 'Server shutting down...'
 
 @flask_app.route('/v1/models', methods=['OPTIONS'])
 def chat_models():

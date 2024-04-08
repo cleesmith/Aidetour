@@ -99,18 +99,21 @@ def check_api_key():
 
 def run_windows_version():
     import aidetour_gui_windows
+    from aidetour_utilities import APP_NAME, APP_LOGO
+    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
     logging.info("Windows detected...")
     app = aidetour_gui_windows.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
     app.MainLoop()
 
 def run_mac_version():
-    import aidetour_gui_mac
-    from aidetour_utilities import APP_NAME, APP_LOGO
-    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
-    logging.info("Mac detected...")
-    print("run_mac_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
-    app = aidetour_gui_mac.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
-    app.run()
+    run_windows_version()
+    # import aidetour_gui_mac
+    # from aidetour_utilities import APP_NAME, APP_LOGO
+    # from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+    # logging.info("Mac detected...")
+    # print("run_mac_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
+    # app = aidetour_gui_mac.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
+    # app.run()
 
 def run_cli_version():
     from aidetour_utilities import APP_NAME, APP_LOGO

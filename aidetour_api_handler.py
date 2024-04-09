@@ -5,7 +5,9 @@ import sys
 import socket
 import errno
 import subprocess
-import logging
+# pip install loguru
+from loguru import logger
+# import logging
 import signal
 import argparse
 import time
@@ -52,7 +54,9 @@ import aidetour_utilities
 import aidetour_logging
 
 
-logger = logging.getLogger('aidetour_api_handler')
+# logger = logging.getLogger('aidetour_api_handler')
+# from aidetour_logging import setup_logger
+# setup_logger('Server.log')
 
 
 MAX_TOKENS = 100
@@ -73,26 +77,17 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # logging.getLogger('flask_cors').level = logging.DEBUG
 
 
-def run_flask_app(host, port, key, status_dict):
+def run_flask_app(host, port, key):
     global ANTHROPIC_API_KEY
     ANTHROPIC_API_KEY = key
     global MODELS_DATA
     MODELS_DATA = aidetour_utilities.load_models_data()
     try:
-        print("run_flask_app=", host, port)
+        logger.info(f"run_flask_app: host={host} port={port}")
         serve(flask_app, host=host, port=port)
-        # server = create_server(flask_app, host=host, port=port)
-        # server.run()
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
-            print(f"Error: Address {host}:{port} is already in use.")
-            status_dict['error'] = True
-        else:
-            status_dict['exception'] = e
-    except Exception as e:  # Catch all other exceptions
-        status_dict['exception'] = e
-    finally:
-        status_dict['running'] = False
+            logger.info(f"Error: Address {host}:{port} is already in use.")
 
 def generate_unique_string():
     unique_id = str(uuid.uuid4())
@@ -169,8 +164,6 @@ def handle_exception(e):
 @flask_app.route('/v1/shutdown', methods=['POST'])
 def shutdown():
     logger.info("Received shutdown request")
-    os.environ['OBJC_DISABLE_INITIALIZE_FORK_SAFETY'] = 'YES'
-    os.execl(sys.executable, sys.executable, *sys.argv)
     return 'Server shutting down...'
 
 @flask_app.route('/v1/models', methods=['OPTIONS'])

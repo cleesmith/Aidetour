@@ -38,7 +38,6 @@
 # pip install Flask Flask-CORS
 # pip install anthropic
 
-
 import os
 import sys
 import subprocess
@@ -47,7 +46,9 @@ import signal
 import argparse
 import time
 import uuid
-import logging
+# pip install loguru
+from loguru import logger
+# import logging
 import json
 import configparser
 import subprocess
@@ -140,13 +141,16 @@ if __name__ == '__main__':
     # Register the signal handler for SIGINT = Ctrl-C
     signal.signal(signal.SIGINT, signal_handler)
 
+    from aidetour_logging import setup_logger
+    setup_logger('Aidetour.log')
+
     # lots and lots of user hand holding...
     parser = argparse.ArgumentParser(description=f"{APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
     parser.add_argument('--cli', action='store_true', help=f"run {APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
-    aidetour_logging.setup_logging()
-    logger = aidetour_logging.get_logger(__name__)
+    # aidetour_logging.setup_logging()
+    # logger = aidetour_logging.get_logger(__name__)
     logger.info(f"Starting {APP_NAME}...")
 
     config_dir = ensure_config_directory()

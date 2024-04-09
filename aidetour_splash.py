@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 from PIL import Image, ImageTk
 
-def show_splash(image_path, message, duration=3000):
+def show_splash(image_path, message, duration=2000):
     root = tk.Tk()
     root.overrideredirect(True)
 

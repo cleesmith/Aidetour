@@ -3,7 +3,9 @@
 import os
 import sys
 import subprocess
-import logging
+# pip install loguru
+from loguru import logger
+# import logging
 import time
 import requests
 import wx
@@ -17,7 +19,7 @@ import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
 from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
 
-logger = logging.getLogger('aidetour_gui_windows')
+# logger = logging.getLogger('aidetour_gui_windows')
 
 class SplitImageDialog(wx.Dialog):
     def __init__(self, parent, title, message, image_path, button_label="OK"):
@@ -54,8 +56,8 @@ class TrayIcon(wx.adv.TaskBarIcon):
         self.port = port
         self.api_key = api_key
         self.server_process = None
-        icon_path = aidetour_utilities.resource_path("Aidetour.png")
-        self.SetIcon(wx.Icon(icon_path), "Aidetour")
+        icon_path = aidetour_utilities.resource_path(APP_LOGO)
+        self.SetIcon(wx.Icon(icon_path), APP_NAME)
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
 
         if aidetour_utilities.is_port_in_use(host, port):
@@ -65,14 +67,14 @@ class TrayIcon(wx.adv.TaskBarIcon):
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
-        info_item = menu.Append(wx.ID_ANY, 'Info')
-        self.Bind(wx.EVT_MENU, self.on_info, info_item)
+        settings_item = menu.Append(wx.ID_ANY, 'Settings')
+        self.Bind(wx.EVT_MENU, self.on_settings, settings_item)
         models_item = menu.Append(wx.ID_ANY, 'Models')
         self.Bind(wx.EVT_MENU, self.on_models, models_item)
         logs_item = menu.Append(wx.ID_ANY, 'Logs')
         self.Bind(wx.EVT_MENU, self.on_logs, logs_item)
         menu.AppendSeparator()
-        start_item = server_menu.Append(wx.ID_ANY, 'Start Server')
+        start_item = menu.Append(wx.ID_ANY, 'Start Server')
         self.Bind(wx.EVT_MENU, self.on_start_server, start_item)
         shutdown_item = menu.Append(wx.ID_ANY, 'Stop Server')
         self.Bind(wx.EVT_MENU, self.on_shutdown, shutdown_item)
@@ -87,10 +89,11 @@ class TrayIcon(wx.adv.TaskBarIcon):
         # this "def on_left_down" seems required for some wx reason ?
         pass  
 
-    def on_info(self, event):
+    def on_settings(self, event):
         afile = "config.ini"
         afile = "requirements.txt"
         file_path = aidetour_utilities.resource_path(afile)
+        logger.info(f"aidetour_gui_windows: on_settings: file_path={file_path}")
         try:
             # subprocess.run(["notepad.exe", file_path], check=True)
             subprocess.run(["open", afile], check=True) # must be a known filetype, like: .txt
@@ -100,7 +103,7 @@ class TrayIcon(wx.adv.TaskBarIcon):
 
     def on_models(self, event):
         models = aidetour_utilities.list_models()
-        dialog = SplitImageDialog(None, "Aidetour", models, aidetour_utilities.resource_path("Aidetour.png"))
+        dialog = SplitImageDialog(None, APP_NAME, models, aidetour_utilities.resource_path(APP_LOGO))
         dialog.ShowModal()
         dialog.Destroy()
 
@@ -110,22 +113,28 @@ class TrayIcon(wx.adv.TaskBarIcon):
         try:
             subprocess.run(["notepad.exe", file_path], check=True)
         except Exception as e:
-            logger.error(f"Unexpected error occurred while opening Aidetour.log file: {e}", exc_info=True)
+            logger.error(f"Unexpected error occurred while opening {afile} file: {e}", exc_info=True)
             wx.LogError(f"Unexpected error occurred while opening the {afile} file.")
 
-
     def on_start_server(self, event):
+        logger.info("aidetour_gui_windows: on_start_server")
         if not self.server_process:
             self.server_process = self.start_server()
 
     def on_shutdown(self, event):
+        logger.info("on_shutdown")
         if self.server_process:
             self.stop_server(self.server_process)
             self.server_process = None
 
     def on_restart_server(self, event):
-        if self.server_process:
-            self.server_process = self.restart_server(self.server_process)
+        logger.info(f"aidetour_gui_windows: on_restart_server: before: {self.server_process}")
+        self.restart_server(self.server_process)
+        # if self.server_process:
+        #     temp_server_process = None
+        #     temp_server_process = self.restart_server(self.server_process)
+        #     self.server_process = temp_server_process
+        logger.info(f"aidetour_gui_windows: on_restart_server: after: {self.server_process}")
 
     def abort_app(self):
         logger.info(f"ERROR: http://{self.host}:{self.port} is already in use!")
@@ -135,9 +144,9 @@ class TrayIcon(wx.adv.TaskBarIcon):
 
     def show_abort_dialog(self, message):
         dialog = SplitImageDialog(None, 
-                                  "Aidetour", 
+                                  APP_NAME, 
                                   message, 
-                                  aidetour_utilities.resource_path("Aidetour.png"),
+                                  aidetour_utilities.resource_path(APP_LOGO),
                                   button_label="Exit")
         dialog.ShowModal()
         dialog.Destroy()
@@ -147,28 +156,34 @@ class TrayIcon(wx.adv.TaskBarIcon):
         sys.exit(1)  # Exit the application with an error status code.
 
     def start_server(self):
-        self.server_process = subprocess.Popen(['python', 'aidetour_api_handler.py',
+        self.server_process = subprocess.Popen(['python', 'run_server.py',
                                                 self.host, str(self.port), self.api_key])
-        print(f"Server started on {self.host}:{self.port}")
+        logger.info(f"Server started on {self.host}:{self.port}")
 
     def stop_server(self, server_process):
         if sys.platform == 'win32':
-            server_process.terminate()
+            self.server_process.terminate()
         else:
-            server_process.terminate()
-            server_process.wait()
-        print("Server stopped.")
+            self.server_process.terminate()
+            self.server_process.wait()
+        logger.info("Server stopped.")
 
     def restart_server(self, server_process):
-        self.stop_server(server_process)
-        time.sleep(1)
-        new_server_process = self.start_server()
-        return new_server_process
-
-    def on_exit(self, event=None):
+        logger.info(f"aidetour_gui_windows: restart_server: before: {self.server_process}")
         if self.server_process:
             self.stop_server(self.server_process)
             self.server_process = None
+        time.sleep(1)
+        if not self.server_process:
+            self.start_server()
+        logger.info(f"aidetour_gui_windows: restart_server: after: {self.server_process}")
+
+    def on_exit(self, event=None):
+        logger.info(f"aidetour_gui_windows: on_exit: before: {self.server_process}")
+        if self.server_process:
+            self.stop_server(self.server_process)
+            self.server_process = None
+        logger.info(f"aidetour_gui_windows: on_exit: after: {self.server_process}")
 
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             self.tray_icon.RemoveIcon()

@@ -14,7 +14,7 @@ from langchain_community.document_loaders import YoutubeLoader
 
 
 loader = YoutubeLoader.from_youtube_url(
-	"https://youtu.be/a2mUqMCrgOc?si=LxSq1FkunsYClPLd",
+	"https://www.youtube.com/live/-oPYGeAdgFI?si=_zj1PNkbjSExICQQ",
 	add_video_info=True,
 	language=["en", "es"],
 	translation="en",

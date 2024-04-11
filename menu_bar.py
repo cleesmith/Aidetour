@@ -10,7 +10,7 @@ class SettingsDialog(wx.Dialog):
     def __init__(self, parent, title):
         super(SettingsDialog, self).__init__(parent, 
             title=title, 
-            size=(350, 320))
+            size=(350, 440))
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -18,6 +18,10 @@ class SettingsDialog(wx.Dialog):
         self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
         self.host = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
         self.port = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
+        self.models = wx.TextCtrl(panel, 
+            pos=(10, 10), 
+            size=(300, 120), 
+            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
         
         vbox.AddSpacer(20)
         vbox.Add(wx.StaticText(panel, -1, 'Anthropic API Key:'), flag=wx.LEFT|wx.TOP, border=10)
@@ -28,6 +32,9 @@ class SettingsDialog(wx.Dialog):
         vbox.AddSpacer(10)
         vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.LEFT|wx.TOP, border=10)
         vbox.Add(self.port, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(10)
+        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models'), flag=wx.CENTER|wx.LEFT|wx.TOP, border=10)
+        vbox.Add(self.models, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(panel, label='Ok')
@@ -37,12 +44,13 @@ class SettingsDialog(wx.Dialog):
         closeButton = wx.Button(panel, label='Cancel')
         hbox.Add(closeButton, flag=wx.LEFT, border=15)
 
-        vbox.AddSpacer(30)
+        vbox.AddSpacer(20)
         vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=5)
         panel.SetSizer(vbox)
         self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
         self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
+        vbox.AddSpacer(50)
 
         self.load_settings()
     
@@ -51,6 +59,10 @@ class SettingsDialog(wx.Dialog):
         self.api_key.SetValue(settings.get('api_key', ''))
         self.host.SetValue(settings.get('host', ''))
         self.port.SetValue(str(settings.get('port', '')))
+        models_dict = settings['Claude']
+        models_str = "The list of available Claude models \nmay not be changed or edited.\n\n"
+        models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
+        self.models.SetValue(models_str)
         settings.close()
     
     def OnSave(self, event):
@@ -67,6 +79,14 @@ class SettingsDialog(wx.Dialog):
     
     def OnClose(self, event):
         self.Destroy()
+
+    def display_models(self, models):
+        # Clear the textbox
+        self.textbox.Clear()
+
+        # Add each model to the textbox on a new line
+        for model in models:
+            self.textbox.AppendText(model + '\n')
 
 
 class LogsDialog(wx.Dialog):
@@ -115,8 +135,9 @@ class YouTubeDialog(wx.Dialog):
             style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self.panel = wx.Panel(self)
 
+        self.vid = video_id
         self.webview = wx.html2.WebView.New(self.panel)
-        video_url = f"https://www.youtube.com/embed/{video_id}"
+        video_url = f"https://www.youtube.com/embed/{self.vid}"
         self.webview.LoadURL(video_url)
 
         self.btn_youtube = wx.Button(self.panel, label="Open on YouTube")
@@ -140,7 +161,7 @@ class YouTubeDialog(wx.Dialog):
         self.SetSize((600, 400))
 
     def on_youtube_click(self, event):
-        webbrowser.open(f"https://www.youtube.com/watch?v={video_id}")
+        webbrowser.open(f"https://www.youtube.com/watch?v={self.vid}")
 
     def on_done_click(self, event):
         self.Close()
@@ -178,7 +199,8 @@ class MyTaskBarIcon(TaskBarIcon):
         dlg.Show()
     
     def OnVideo(self, event):
-        video_id = "Seu8KkqBY1k?si=hqK9lKTbT6xYf3HX"
+        # video_id = "Seu8KkqBY1k?si=hqK9lKTbT6xYf3HX"
+        video_id = "-oPYGeAdgFI?si=RXHxkWUfzsxh5aYr"
         dlg = YouTubeDialog(None, video_id)
         dlg.Show()
 

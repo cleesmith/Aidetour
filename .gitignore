@@ -1,19 +1,31 @@
-# Environment variables to hide api key
+# do NOT put any of the following in the github repo:
+
+# not used, but ignore environment variables just in case:
 .env
 
-# Log files
-*.log
-
-# macOS folder attributes
+# macOS folder attributes:
 .DS_Store
 
-git_setup.txt
+*.log
 config.ini
 models.ini
+git_setup.txt
+cls*
+youtube*
+yt*
+mule*
+shelve*
+hopo*
+menu*
 
-# ignore PyInstaller stuff:
+# PyInstaller stuff:
 build/
 dist/
 *.spec
 __pycache__/
 
+# Shelve files:
+*.db
+*.dat
+*.dir
+*.bak

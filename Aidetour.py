@@ -31,6 +31,9 @@
 # Aidetour\Scripts\activate
 # python Aidetour.py
 
+# pip install pipreqs
+# pipreqs --force
+
 # pip install wxPython
 # pip install requests
 # pip install Flask Flask-CORS

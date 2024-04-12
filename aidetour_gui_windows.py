@@ -3,9 +3,7 @@
 import os
 import sys
 import subprocess
-# pip install loguru
 from loguru import logger
-# import logging
 import time
 import requests
 import wx
@@ -19,7 +17,6 @@ import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
 from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
 
-# logger = logging.getLogger('aidetour_gui_windows')
 
 class SplitImageDialog(wx.Dialog):
     def __init__(self, parent, title, message, image_path, button_label="OK"):

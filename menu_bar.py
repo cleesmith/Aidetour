@@ -5,6 +5,13 @@ import wx.adv
 import wx.html2
 import webbrowser
 
+# Aidetour modules:
+import aidetour_logging
+import aidetour_api_handler
+import aidetour_utilities
+from aidetour_utilities import APP_NAME, APP_LOGO
+from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+
 
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, title):
@@ -105,15 +112,20 @@ class SettingsDialog(wx.Dialog):
         self.load_settings()
     
     def load_settings(self):
-        settings = shelve.open('Aidetour_Settings')
-        self.api_key.SetValue(settings.get('api_key', ''))
-        self.host.SetValue(settings.get('host', ''))
-        self.port.SetValue(str(settings.get('port', '')))
-        models_dict = settings['Claude']
-        models_str = "As of April 2024; this list may not be changed.\n\n"
-        models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
+        # settings = shelve.open('Aidetour_Settings')
+        # self.api_key.SetValue(settings.get('api_key', ''))
+        # self.host.SetValue(settings.get('host', ''))
+        # self.port.SetValue(str(settings.get('port', '')))
+        # models_dict = settings['Claude']
+        # models_str = "As of April 2024; this list may not be changed.\n\n"
+        # models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
+        # self.models.SetValue(models_str)
+        # settings.close()
+        api_key, host, port, models_dict, models_str = aidetour_utilities.load_settings()
+        self.api_key.SetValue(api_key)
+        self.host.SetValue(host)
+        self.port.SetValue(port)
         self.models.SetValue(models_str)
-        settings.close()
     
     def OnSave(self, event):
         settings = shelve.open('Aidetour_Settings')

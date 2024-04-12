@@ -1,6 +1,7 @@
 # aidetour_utilities.py
 
 import os
+import shelve
 import socket
 import sys
 import logging
@@ -21,6 +22,16 @@ ANTHROPIC_API_KEY = None
 
 logger = logging.getLogger('aidetour_utilities')
 
+    
+def load_settings():
+    settings = shelve.open('Aidetour_Settings')
+    api_key = settings.get('api_key', '')
+    host = settings.get('host', '')
+    port = str(settings.get('port', ''))
+    models_dict = settings['Claude']
+    models_str = "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
+    settings.close()
+    return api_key, host, port, models_dict, models_str
 
 def is_port_in_use(host, port):
     # note: these 3 host values all catch the error:

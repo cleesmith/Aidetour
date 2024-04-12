@@ -31,8 +31,6 @@
 # Aidetour\Scripts\activate
 # python Aidetour.py
 
-# pip install python-dotenv
-# pip install rumps
 # pip install wxPython
 # pip install requests
 # pip install Flask Flask-CORS
@@ -48,14 +46,11 @@ import time
 import uuid
 # pip install loguru
 from loguru import logger
-# import logging
 import json
 import configparser
 import subprocess
 import threading
 from datetime import datetime, timezone
-# pip install python-dotenv
-from dotenv import load_dotenv
 
 # Aidetour modules:
 import aidetour_logging

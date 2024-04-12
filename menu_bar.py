@@ -10,32 +10,83 @@ class SettingsDialog(wx.Dialog):
     def __init__(self, parent, title):
         super(SettingsDialog, self).__init__(parent, 
             title=title, 
-            size=(350, 440))
+            size=(350, 480))
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         
-        self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
         self.host = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
         self.port = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
+        self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
         self.models = wx.TextCtrl(panel, 
             pos=(10, 10), 
             size=(300, 120), 
             style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+        self.models.SetBackgroundColour("DARK GRAY")
+        self.models.SetForegroundColour("WHEAT")
         
-        vbox.AddSpacer(20)
-        vbox.Add(wx.StaticText(panel, -1, 'Anthropic API Key:'), flag=wx.LEFT|wx.TOP, border=10)
-        vbox.Add(self.api_key, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(10)
-        vbox.Add(wx.StaticText(panel, -1, 'Host:'), flag=wx.LEFT|wx.TOP, border=10)
+        vbox.AddSpacer(5)
+
+        label00 = wx.StaticText(panel, -1, 'Your Local API Server', style=wx.ALIGN_CENTER)
+        label00.SetForegroundColour('SEA GREEN')
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        label00.SetFont(font)
+        vbox.Add(label00, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(2)
+
+        label0 = wx.StaticText(panel, -1, 
+            '"speaks like Sam; thinks like Claude"',
+            style=wx.ALIGN_CENTER)
+        label0.SetForegroundColour('WHEAT')
+        font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
+            faceName="Comic Sans MS")
+        label0.SetFont(font)
+        vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(3)
+
+        label1 = wx.StaticText(panel, -1, 'Host:', style=wx.LEFT)
+        label1.SetForegroundColour('SEA GREEN')
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        label1.SetFont(font)
+        vbox.Add(label1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
         vbox.Add(self.host, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
         vbox.AddSpacer(10)
-        vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.LEFT|wx.TOP, border=10)
+
+        label2 = wx.StaticText(panel, -1, 'Port:', style=wx.LEFT)
+        label2.SetForegroundColour('SEA GREEN')
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        label2.SetFont(font)
+        vbox.Add(label2, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
         vbox.Add(self.port, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
         vbox.AddSpacer(10)
-        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models'), flag=wx.CENTER|wx.LEFT|wx.TOP, border=10)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add((10, -1), proportion=0)  # Left margin, adjust '20' as needed for indentation
+        line = wx.Panel(panel, -1, size=(330, 2))  # Adjust '100' to required width, '2' for height
+        line.SetBackgroundColour('SIENNA')
+        hbox.Add(line, proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
+        hbox.Add((20, -1), proportion=0)  # Right margin, adjust '20' as needed
+        vbox.Add(hbox, proportion=0, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+        vbox.AddSpacer(10)
+
+        label3 = wx.StaticText(panel, -1, 'Your Anthropic API Key:', style=wx.LEFT)
+        label3.SetForegroundColour('FIREBRICK')
+        font = wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_EXTRABOLD)
+        label3.SetFont(font)
+        vbox.Add(label3, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(5)
+        vbox.Add(self.api_key, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(20)
+
+        label4 = wx.StaticText(panel, -1, 'Claude 3 models', style=wx.ALIGN_CENTER)
+        label4.SetForegroundColour('WHEAT')
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        label4.SetFont(font)
+        vbox.Add(label4, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        vbox.AddSpacer(5)
         vbox.Add(self.models, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
 
+        # bottom row of buttons:
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(panel, label='Ok')
         hbox.Add(okButton)
@@ -43,7 +94,6 @@ class SettingsDialog(wx.Dialog):
         hbox.Add(restartButton, flag=wx.LEFT, border=15)
         closeButton = wx.Button(panel, label='Cancel')
         hbox.Add(closeButton, flag=wx.LEFT, border=15)
-
         vbox.AddSpacer(20)
         vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=5)
         panel.SetSizer(vbox)
@@ -60,7 +110,7 @@ class SettingsDialog(wx.Dialog):
         self.host.SetValue(settings.get('host', ''))
         self.port.SetValue(str(settings.get('port', '')))
         models_dict = settings['Claude']
-        models_str = "The list of available Claude models \nmay not be changed or edited.\n\n"
+        models_str = "As of April 2024; this list may not be changed.\n\n"
         models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
         self.models.SetValue(models_str)
         settings.close()
@@ -171,11 +221,15 @@ class MyTaskBarIcon(TaskBarIcon):
     def __init__(self):
         super(MyTaskBarIcon, self).__init__()
         self.SetIcon(wx.Icon('Aidetour.png', wx.BITMAP_TYPE_PNG), 'Aidetour')
+        # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
+        self.settings_dialog = None
+        self.logs_dialog = None
+        self.video_dialog = None
         self.Bind(wx.EVT_MENU, self.OnSettings, id=1)
-        self.Bind(wx.EVT_MENU, self.OnLogs,     id=2)
-        self.Bind(wx.EVT_MENU, self.OnVideo,    id=3)
-        self.Bind(wx.EVT_MENU, self.OnExit,     id=4)
-    
+        self.Bind(wx.EVT_MENU, self.OnLogs, id=2)
+        self.Bind(wx.EVT_MENU, self.OnVideo, id=3)
+        self.Bind(wx.EVT_MENU, self.OnExit, id=4)
+
     def CreatePopupMenu(self):
         menu = wx.Menu()
         menu.Append(1, 'Settings')
@@ -184,25 +238,26 @@ class MyTaskBarIcon(TaskBarIcon):
         menu.Append(4, 'Exit')
         return menu
 
+    def OnSettings(self, event):
+        if not self.settings_dialog or not self.settings_dialog.IsShown():
+            self.settings_dialog = SettingsDialog(None, "Aidetour Settings")
+            self.settings_dialog.Show()
+
+    def OnLogs(self, event):
+        if not self.logs_dialog or not self.logs_dialog.IsShown():
+            self.logs_dialog = LogsDialog(None, "Aidetour Log")
+            self.logs_dialog.Show()
+
+    def OnVideo(self, event):
+        if not self.video_dialog or not self.video_dialog.IsShown():
+            video_id = "-oPYGeAdgFI?si=RXHxkWUfzsxh5aYr"
+            self.video_dialog = YouTubeDialog(None, video_id)
+            self.video_dialog.Show()
+
     def OnExit(self, event):
         wx.CallAfter(self.Destroy)
-        wx.Exit()  # Exit the application
-    
-    def OnSettings(self, event):
-        # Open the settings dialog non-modally
-        dlg = SettingsDialog(None, "Aidetour Settings")
-        dlg.Show()
-    
-    def OnLogs(self, event):
-        # Open the logs dialog non-modally
-        dlg = LogsDialog(None, "Aidetour Log")
-        dlg.Show()
-    
-    def OnVideo(self, event):
-        # video_id = "Seu8KkqBY1k?si=hqK9lKTbT6xYf3HX"
-        video_id = "-oPYGeAdgFI?si=RXHxkWUfzsxh5aYr"
-        dlg = YouTubeDialog(None, video_id)
-        dlg.Show()
+        wx.Exit()
+
 
 
 class MyApp(wx.App):

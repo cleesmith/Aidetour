@@ -3,9 +3,9 @@ from loguru import logger
 from aidetour_api_handler import run_flask_app
 
 # Aidetour modules:
-import aidetour_utilities
 import aidetour_logging
 from aidetour_logging import setup_logger
+import aidetour_utilities
 
 setup_logger('Server.log')
 

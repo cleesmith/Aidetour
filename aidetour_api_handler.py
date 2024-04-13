@@ -46,9 +46,8 @@ import anthropic
 # Aidetour modules:
 import aidetour_logging
 import aidetour_utilities
-from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT
-from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+# an alias to 'config.' instead of 'aidetour_utilities.'
+import aidetour_utilities as config 
 
 
 MAX_TOKENS = 100
@@ -56,8 +55,6 @@ TEMPERATURE = 1
 STREAM_RESPONSE = True
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
-# ANTHROPIC_API_KEY = None
-# MODELS_DATA = None
 
 
 flask_app = Flask(__name__)
@@ -70,19 +67,17 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 
 
 def run_flask_app():
-    print(f"run_flask_app: aidetour_utilities.load_settings()={aidetour_utilities.load_settings()}")
     aidetour_utilities.load_settings()
-    print(f"run_flask_app: ANTHROPIC_API_MODELS={ANTHROPIC_API_MODELS}")
     # global ANTHROPIC_API_KEY
     # ANTHROPIC_API_KEY = key
     # global MODELS_DATA
     # MODELS_DATA = aidetour_utilities.load_models_data()
     try:
-        logger.info(f"run_flask_app: host={HOST} port={PORT}")
-        serve(flask_app, host=HOST, port=PORT)
+        logger.info(f"run_flask_app: host={config.HOST} port={config.PORT}")
+        serve(flask_app, host=config.HOST, port=config.PORT)
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
-            logger.info(f"Error: Address {HOST}:{PORT} is already in use.")
+            logger.info(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
 
 def generate_unique_string():
     unique_id = str(uuid.uuid4())

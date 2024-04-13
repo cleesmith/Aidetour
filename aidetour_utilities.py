@@ -14,6 +14,7 @@ import aidetour_logging
 from aidetour_logging import setup_logger
 
 APP_NAME = "Aidetour"
+APP_LOG = "Aidetour.log"
 APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash.py'
 HOST = None
@@ -30,9 +31,8 @@ def load_settings():
     ANTHROPIC_API_MODELS = settings['Claude']
     models_str = "\n".join([f"{key}:\t {value}" for key, value in ANTHROPIC_API_MODELS.items()])
     HOST = settings.get('host', '')
-    PORT = int(str(settings.get('port', '')))
+    PORT = str(settings.get('port', ''))
     settings.close()
-    logger.info(f"aidetour_utilities: load_settings: ANTHROPIC_API_MODELS={ANTHROPIC_API_MODELS}, {HOST}:{PORT}")
 
 def is_port_in_use(host, port):
     # note: these 3 host values all catch the error:
@@ -40,7 +40,7 @@ def is_port_in_use(host, port):
     # host = '0.0.0.0'
     # host = '127.0.0.1'
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((host, port)) == 0
+        return s.connect_ex((host, int(port))) == 0
 
 def show_splash_screen():
 #     welcome_message = '''
@@ -101,7 +101,7 @@ def executable_dir():
         # Otherwise, just use the current working directory
         executable_dir = os.path.dirname(os.path.realpath(__file__))
 
-    logger.info(">>>>>>>> executable_dir: %s", executable_dir)
+    logger.info(f">>>>>>>> executable_dir={executable_dir}")
     return executable_dir
 
 def resource_path(relative_path):

@@ -58,73 +58,44 @@ from datetime import datetime, timezone
 import aidetour_logging
 import aidetour_api_handler
 import aidetour_utilities
-from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT
-from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+# an alias to 'config.' instead of 'aidetour_utilities.'
+import aidetour_utilities as config 
 
 
 def check_api_key():
-    return "spud"
-    # required to assign a new value to global value:
-    # global ANTHROPIC_API_KEY
-    # Load environment variables from .env file, assumed to be same folder as app:
-    # load_dotenv()
-    ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
-
     # Check if the API key is missing or empty
-    if ANTHROPIC_API_KEY is None or ANTHROPIC_API_KEY.strip() == '':
+    if config.ANTHROPIC_API_KEY is None or config.ANTHROPIC_API_KEY.strip() == '':
         error_message = "ERROR\n\n"
-        error_message += "The ANTHROPIC_API_KEY is missing or empty, "
-        error_message += "please open and edit the .env file here:\n\n"
-        error_message += f"{aidetour_utilities.executable_dir()}/.env\n\n"
-        error_message += "then add or set the ANTHROPIC_API_KEY= to your actual Anthropic API key, then run this app again.\n\n"
+        error_message += "The ANTHROPIC_API_KEY is missing or empty!"
         error_message += "More details are provided in the README file for this app."
         logger.error(error_message)
-        aidetour_utilities.show_custom_message(APP_NAME, error_message)
+        aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
         sys.exit(1) 
 
     # Check if the API key is the placeholder value
-    if ANTHROPIC_API_KEY == 'your_api_key_here':
+    if config.ANTHROPIC_API_KEY == 'your_api_key_here':
         error_message = "ERROR\n\n"
-        error_message += "Please change the placeholder API key in the .env file with your actual Anthropic API key.\n\n"
-        error_message += "Open and edit the .env file, replace the 'your_api_key_here' with your Anthropic API key, then run this app again.\n\n"
-        error_message += f"{aidetour_utilities.executable_dir()}/.env\n\n"
+        error_message += "Please replace the 'your_api_key_here' with your Anthropic API key, then run this app again.\n\n"
         error_message += "More details are provided in the README file for this app."
         logger.error(error_message)
-        aidetour_utilities.show_custom_message(APP_NAME, error_message)
+        aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
         sys.exit(1) 
 
-    return ANTHROPIC_API_KEY
 
-
-def run_windows_version():
-    import aidetour_gui_windows
-    # from aidetour_utilities import APP_NAME, APP_LOGO
-    # from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
-    logging.info("Windows detected...")
-    app = aidetour_gui_windows.Aidetour()
+def run_gui_version():
+    import aidetour_gui
+    logging.info("GUI launched...")
+    app = aidetour_gui.Aidetour()
     app.MainLoop()
 
-def run_mac_version():
-    run_windows_version()
-    # import aidetour_gui_mac
-    # from aidetour_utilities import APP_NAME, APP_LOGO
-    # from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
-    # logging.info("Mac detected...")
-    # print("run_mac_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
-    # app = aidetour_gui_mac.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
-    # app.run()
-
 def run_cli_version():
-    from aidetour_utilities import APP_NAME, APP_LOGO
-    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
-    logging.info(f"Starting {APP_NAME} in CLI mode...")
-    print("run_cli_version=", APP_NAME, APP_LOGO, HOST, PORT, ANTHROPIC_API_KEY)
+    logging.info(f"Starting {config.APP_NAME} in CLI mode...")
+    print("run_cli_version=", config.APP_NAME, config.APP_LOGO, config.HOST, config.PORT)
     aidetour_api_handler.run_flask_app(HOST, PORT, ANTHROPIC_API_KEY)
 
 def ensure_config_directory():
     home_dir = os.path.expanduser('~')
-    config_dir = os.path.join(home_dir, APP_NAME)
+    config_dir = os.path.join(home_dir, config.APP_NAME)
     if not os.path.exists(config_dir):
         os.makedirs(config_dir)
     return config_dir
@@ -141,18 +112,17 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     from aidetour_logging import setup_logger
-    setup_logger('Aidetour.log')
-    logger.info(f"Starting {APP_NAME}...")
+    setup_logger(config.APP_LOG)
+    logger.info(f"Starting {config.APP_NAME}...")
 
-    parser = argparse.ArgumentParser(description=f"{APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
-    parser.add_argument('--cli', action='store_true', help=f"run {APP_NAME} in CLI mode (no GUI).")
+    # FIXME see AI for a command line way to allow user to edit Settings
+    parser = argparse.ArgumentParser(description=f"{config.APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
+    parser.add_argument('--cli', action='store_true', help=f"run {config.APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
     config_dir = ensure_config_directory()
 
     aidetour_utilities.load_settings()
-    logger.info(f"main: ANTHROPIC_API_MODELS={ANTHROPIC_API_MODELS}")
-    logger.info(f"main: {HOST}:{PORT}")
 
     # config_files_ok = aidetour_utilities.check_create_config_files()
     # if not config_files_ok:
@@ -162,7 +132,7 @@ if __name__ == '__main__':
 
     # aidetour_utilities.HOST, aidetour_utilities.PORT = aidetour_utilities.read_config_ini()
 
-    # aidetour_utilities.ANTHROPIC_API_KEY = check_api_key()
+    check_api_key()
 
     # models = aidetour_utilities.list_models()
     # logger.info(models)
@@ -171,10 +141,10 @@ if __name__ == '__main__':
         run_cli_version()
     elif sys.platform.startswith('darwin'):
         aidetour_utilities.show_splash_screen()
-        run_mac_version()
+        run_gui_version()
     elif sys.platform.startswith('win'):
         aidetour_utilities.show_splash_screen()
-        run_windows_version()
+        run_gui_version()
     else:
         logger.info("GUI mode is only supported on Windows and macOS, so now running in CLI mode...")
         run_cli_version()

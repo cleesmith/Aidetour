@@ -10,19 +10,8 @@ import webbrowser
 import aidetour_logging
 import aidetour_api_handler
 import aidetour_utilities
-from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT
-from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
-
-
-import aidetour_utilities as utils # an alias = less typing
-utils.HOST
-utils.PORT
-utils.ANTHROPIC_API_KEY
-utils.ANTHROPIC_API_MODELS
-
-
-
+# an alias to 'config.' instead of 'aidetour_utilities.'
+import aidetour_utilities as config 
 
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, title):
@@ -120,25 +109,16 @@ class SettingsDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
         vbox.AddSpacer(50)
 
-        self.load_settings()
+        self.load_settings_for_dialog()
     
-    def load_settings(self):
-        # settings = shelve.open('Aidetour_Settings')
-        # self.api_key.SetValue(settings.get('api_key', ''))
-        # self.host.SetValue(settings.get('host', ''))
-        # self.port.SetValue(str(settings.get('port', '')))
-        # models_dict = settings['Claude']
-        # models_str = "As of April 2024; this list may not be changed.\n\n"
-        # models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
-        # self.models.SetValue(models_str)
-        # settings.close()
-        logger.info(f"menu_bar: ANTHROPIC_API_MODELS={aidetour_utilities.ANTHROPIC_API_MODELS}")
-        logger.info(f"menu_bar: {aidetour_utilities.HOST}:{aidetour_utilities.PORT}")
-        self.api_key.SetValue(api_key)
-        self.host.SetValue(host)
-        self.port.SetValue(port)
+    def load_settings_for_dialog(self):
+        aidetour_utilities.load_settings()
+        self.api_key.SetValue(config.ANTHROPIC_API_KEY)
+        models_str = "As of April 2024; this list may not be changed.\n\n"
+        models_str += "\n".join([f"{key}:\t {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
         self.models.SetValue(models_str)
-
+        self.host.SetValue(config.HOST)
+        self.port.SetValue(config.PORT)
     
     def OnSave(self, event):
         settings = shelve.open('Aidetour_Settings')
@@ -156,10 +136,7 @@ class SettingsDialog(wx.Dialog):
         self.Destroy()
 
     def display_models(self, models):
-        # Clear the textbox
         self.textbox.Clear()
-
-        # Add each model to the textbox on a new line
         for model in models:
             self.textbox.AppendText(model + '\n')
 
@@ -190,7 +167,7 @@ class LogsDialog(wx.Dialog):
     
     def load_logs(self):
         try:
-            with open("Aidetour.log", "r") as file:
+            with open(config.APP_LOG, "r") as file:
                 logs = file.read()
                 self.log_text.SetValue(logs)
         except FileNotFoundError:
@@ -245,7 +222,7 @@ class YouTubeDialog(wx.Dialog):
 class MyTaskBarIcon(TaskBarIcon):
     def __init__(self):
         super(MyTaskBarIcon, self).__init__()
-        self.SetIcon(wx.Icon('Aidetour.png', wx.BITMAP_TYPE_PNG), 'Aidetour')
+        self.SetIcon(wx.Icon(config.APP_LOGO, wx.BITMAP_TYPE_PNG), config.APP_NAME)
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
         self.settings_dialog = None
         self.logs_dialog = None
@@ -287,21 +264,17 @@ class MyTaskBarIcon(TaskBarIcon):
 class MyApp(wx.App):
     def OnInit(self):
         self.SetTopWindow(wx.Frame(None, size=(0, 0)))  # Ensure it's properly hidden
-        MyTaskBarIcon()  # Just initialize the task bar icon
+        MyTaskBarIcon()
         return True
 
 if __name__ == '__main__':
 
     # cls: only need these when running as: python -B menu_bar.py
     from aidetour_logging import setup_logger
-    setup_logger('Aidetour.log')
-    logger.info(f"Starting {APP_NAME}...")
+    setup_logger(config.APP_LOG)
+    logger.info(f"Starting {config.APP_NAME}...")
 
-    # required to assign a new value to any global value:
-    global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
     aidetour_utilities.load_settings()
-    logger.info(f"menu_bar: main: ANTHROPIC_API_MODELS={aidetour_utilities.ANTHROPIC_API_MODELS}")
-    logger.info(f"menu_bar: main: {HOST}:{PORT}")
 
     app = MyApp(False)
     app.MainLoop()

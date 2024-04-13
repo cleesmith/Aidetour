@@ -15,7 +15,8 @@ import aidetour_logging
 import aidetour_api_handler
 import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+from aidetour_utilities import HOST, PORT
+from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
 
 
 class SplitImageDialog(wx.Dialog):
@@ -46,18 +47,15 @@ class SplitImageDialog(wx.Dialog):
         self.Layout()
 
 class TrayIcon(wx.adv.TaskBarIcon):
-    def __init__(self, frame, host, port, api_key):
+    def __init__(self, frame):
         super().__init__()
         self.frame = frame
-        self.host = host
-        self.port = port
-        self.api_key = api_key
         self.server_process = None
         icon_path = aidetour_utilities.resource_path(APP_LOGO)
         self.SetIcon(wx.Icon(icon_path), APP_NAME)
         self.Bind(wx.adv.EVT_TASKBAR_LEFT_DOWN, self.on_left_down)
 
-        if aidetour_utilities.is_port_in_use(host, port):
+        if aidetour_utilities.is_port_in_use(HOST, PORT):
             self.abort_app()
         else:
             self.start_server()
@@ -134,8 +132,8 @@ class TrayIcon(wx.adv.TaskBarIcon):
         logger.info(f"aidetour_gui_windows: on_restart_server: after: {self.server_process}")
 
     def abort_app(self):
-        logger.info(f"ERROR: http://{self.host}:{self.port} is already in use!")
-        message = f"ERROR: \n\n\nhttp://{self.host}:{self.port} \n\n\n...is already in use!\n\n\nPlease check your {APP_NAME} configuration."
+        logger.info(f"ERROR: http://{HOST}:{PORT} is already in use!")
+        message = f"ERROR: \n\n\nhttp://{HOST}:{PORT} \n\n\n...is already in use!\n\n\nPlease check your {APP_NAME} configuration."
         # Ensure GUI operations are run in the main thread
         wx.CallAfter(self.show_abort_dialog, message)
 
@@ -153,9 +151,9 @@ class TrayIcon(wx.adv.TaskBarIcon):
         sys.exit(1)  # Exit the application with an error status code.
 
     def start_server(self):
-        self.server_process = subprocess.Popen(['python', 'run_server.py',
-                                                self.host, str(self.port), self.api_key])
-        logger.info(f"Server started on {self.host}:{self.port}")
+        self.server_process = subprocess.Popen(['python', 'aidetour_run_server.py',
+                                                HOST, str(PORT), ANTHROPIC_API_KEY])
+        logger.info(f"Server started on {HOST}:{PORT}")
 
     def stop_server(self, server_process):
         if sys.platform == 'win32':
@@ -194,15 +192,12 @@ class TrayIcon(wx.adv.TaskBarIcon):
         wx.GetApp().ExitMainLoop()
 
 class Aidetour(wx.App):
-    def __init__(self, host, port, api_key, redirect=False):
-        self.host = host
-        self.port = port
-        self.api_key = api_key
+    def __init__(self, redirect=False):
         super().__init__(redirect)
 
     def OnInit(self):
         frame = wx.Frame(None)
         self.SetTopWindow(frame)
-        TrayIcon(frame, self.host, self.port, self.api_key)
+        TrayIcon(frame)
         return True
 

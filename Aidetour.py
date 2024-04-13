@@ -47,7 +47,6 @@ import signal
 import argparse
 import time
 import uuid
-# pip install loguru
 from loguru import logger
 import json
 import configparser
@@ -60,14 +59,16 @@ import aidetour_logging
 import aidetour_api_handler
 import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+from aidetour_utilities import HOST, PORT
+from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
 
 
 def check_api_key():
+    return "spud"
     # required to assign a new value to global value:
     # global ANTHROPIC_API_KEY
     # Load environment variables from .env file, assumed to be same folder as app:
-    load_dotenv()
+    # load_dotenv()
     ANTHROPIC_API_KEY = os.getenv('ANTHROPIC_API_KEY')
 
     # Check if the API key is missing or empty
@@ -98,10 +99,10 @@ def check_api_key():
 
 def run_windows_version():
     import aidetour_gui_windows
-    from aidetour_utilities import APP_NAME, APP_LOGO
-    from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+    # from aidetour_utilities import APP_NAME, APP_LOGO
+    # from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
     logging.info("Windows detected...")
-    app = aidetour_gui_windows.Aidetour(HOST, PORT, ANTHROPIC_API_KEY)
+    app = aidetour_gui_windows.Aidetour()
     app.MainLoop()
 
 def run_mac_version():
@@ -136,35 +137,35 @@ def signal_handler(sig, frame):
     sys.exit(0)
 
 if __name__ == '__main__':
-    # Register the signal handler for SIGINT = Ctrl-C
+    # register the signal handler for SIGINT = Ctrl-C
     signal.signal(signal.SIGINT, signal_handler)
 
     from aidetour_logging import setup_logger
     setup_logger('Aidetour.log')
+    logger.info(f"Starting {APP_NAME}...")
 
-    # lots and lots of user hand holding...
     parser = argparse.ArgumentParser(description=f"{APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
     parser.add_argument('--cli', action='store_true', help=f"run {APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
-    # aidetour_logging.setup_logging()
-    # logger = aidetour_logging.get_logger(__name__)
-    logger.info(f"Starting {APP_NAME}...")
-
     config_dir = ensure_config_directory()
 
-    config_files_ok = aidetour_utilities.check_create_config_files()
-    if not config_files_ok:
-        logger.error("Configuration files were created or updated. Please change and review them before running Aidetour again.")
-        print("Configuration files were created or updated. Please change and review them before running Aidetour again.")
-        sys.exit(1)
+    aidetour_utilities.load_settings()
+    logger.info(f"main: ANTHROPIC_API_MODELS={ANTHROPIC_API_MODELS}")
+    logger.info(f"main: {HOST}:{PORT}")
 
-    aidetour_utilities.HOST, aidetour_utilities.PORT = aidetour_utilities.read_config_ini()
+    # config_files_ok = aidetour_utilities.check_create_config_files()
+    # if not config_files_ok:
+    #     logger.error("Configuration files were created or updated. Please change and review them before running Aidetour again.")
+    #     print("Configuration files were created or updated. Please change and review them before running Aidetour again.")
+    #     sys.exit(1)
 
-    aidetour_utilities.ANTHROPIC_API_KEY = check_api_key()
+    # aidetour_utilities.HOST, aidetour_utilities.PORT = aidetour_utilities.read_config_ini()
 
-    models = aidetour_utilities.list_models()
-    logger.info(models)
+    # aidetour_utilities.ANTHROPIC_API_KEY = check_api_key()
+
+    # models = aidetour_utilities.list_models()
+    # logger.info(models)
 
     if args.cli:
         run_cli_version()

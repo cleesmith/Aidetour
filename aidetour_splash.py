@@ -2,7 +2,7 @@ import sys
 import tkinter as tk
 from PIL import Image, ImageTk
 
-def show_splash(image_path, message, duration=2000):
+def show_splash(image_path, message, duration=4000):
     root = tk.Tk()
     root.overrideredirect(True)
 
@@ -14,7 +14,7 @@ def show_splash(image_path, message, duration=2000):
 
     # Display a message below the image
     # canvas.create_text(img.width / 2, img.height + 100, text=message, fill="white")
-    canvas.create_text(img.width / 2, img.height + 60, text=message, fill="white", font=("Comic Sans MS", 30))
+    canvas.create_text(img.width / 2, img.height + 60, text=message, fill="white", font=("Comic Sans MS", 20))
 
     # Center the splash screen
     ws = root.winfo_screenwidth()

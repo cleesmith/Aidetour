@@ -1,4 +1,5 @@
 import shelve
+from loguru import logger
 import wx
 from wx.adv import TaskBarIcon as TaskBarIcon
 import wx.adv
@@ -10,7 +11,17 @@ import aidetour_logging
 import aidetour_api_handler
 import aidetour_utilities
 from aidetour_utilities import APP_NAME, APP_LOGO
-from aidetour_utilities import HOST, PORT, ANTHROPIC_API_KEY
+from aidetour_utilities import HOST, PORT
+from aidetour_utilities import ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+
+
+import aidetour_utilities as utils # an alias = less typing
+utils.HOST
+utils.PORT
+utils.ANTHROPIC_API_KEY
+utils.ANTHROPIC_API_MODELS
+
+
 
 
 class SettingsDialog(wx.Dialog):
@@ -41,15 +52,15 @@ class SettingsDialog(wx.Dialog):
         vbox.Add(label00, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
         vbox.AddSpacer(2)
 
-        label0 = wx.StaticText(panel, -1, 
-            '"speaks like Sam; thinks like Claude"',
-            style=wx.ALIGN_CENTER)
-        label0.SetForegroundColour('WHEAT')
-        font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
-            faceName="Comic Sans MS")
-        label0.SetFont(font)
-        vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(3)
+        # label0 = wx.StaticText(panel, -1, 
+        #     '"speaks like Sam; thinks like Claude"',
+        #     style=wx.ALIGN_CENTER)
+        # label0.SetForegroundColour('WHEAT')
+        # font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
+        #     faceName="Comic Sans MS")
+        # label0.SetFont(font)
+        # vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(3)
 
         label1 = wx.StaticText(panel, -1, 'Host:', style=wx.LEFT)
         label1.SetForegroundColour('SEA GREEN')
@@ -121,11 +132,13 @@ class SettingsDialog(wx.Dialog):
         # models_str += "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
         # self.models.SetValue(models_str)
         # settings.close()
-        api_key, host, port, models_dict, models_str = aidetour_utilities.load_settings()
+        logger.info(f"menu_bar: ANTHROPIC_API_MODELS={aidetour_utilities.ANTHROPIC_API_MODELS}")
+        logger.info(f"menu_bar: {aidetour_utilities.HOST}:{aidetour_utilities.PORT}")
         self.api_key.SetValue(api_key)
         self.host.SetValue(host)
         self.port.SetValue(port)
         self.models.SetValue(models_str)
+
     
     def OnSave(self, event):
         settings = shelve.open('Aidetour_Settings')
@@ -271,13 +284,24 @@ class MyTaskBarIcon(TaskBarIcon):
         wx.Exit()
 
 
-
 class MyApp(wx.App):
     def OnInit(self):
         self.SetTopWindow(wx.Frame(None, size=(0, 0)))  # Ensure it's properly hidden
         MyTaskBarIcon()  # Just initialize the task bar icon
         return True
 
+if __name__ == '__main__':
 
-app = MyApp(False)
-app.MainLoop()
+    # cls: only need these when running as: python -B menu_bar.py
+    from aidetour_logging import setup_logger
+    setup_logger('Aidetour.log')
+    logger.info(f"Starting {APP_NAME}...")
+
+    # required to assign a new value to any global value:
+    global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
+    aidetour_utilities.load_settings()
+    logger.info(f"menu_bar: main: ANTHROPIC_API_MODELS={aidetour_utilities.ANTHROPIC_API_MODELS}")
+    logger.info(f"menu_bar: main: {HOST}:{PORT}")
+
+    app = MyApp(False)
+    app.MainLoop()

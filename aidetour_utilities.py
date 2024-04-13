@@ -4,13 +4,14 @@ import os
 import shelve
 import socket
 import sys
-import logging
+from loguru import logger
 import configparser
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
 
 import aidetour_logging
+from aidetour_logging import setup_logger
 
 APP_NAME = "Aidetour"
 APP_LOGO = "Aidetour.png"
@@ -18,20 +19,20 @@ APP_SPLASH = 'aidetour_splash.py'
 HOST = None
 PORT = None
 ANTHROPIC_API_KEY = None
-
-
-logger = logging.getLogger('aidetour_utilities')
+ANTHROPIC_API_MODELS = None
 
     
 def load_settings():
+    # required to assign a new value to any global value:
+    global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
     settings = shelve.open('Aidetour_Settings')
-    api_key = settings.get('api_key', '')
-    host = settings.get('host', '')
-    port = str(settings.get('port', ''))
-    models_dict = settings['Claude']
-    models_str = "\n".join([f"{key}:\t {value}" for key, value in models_dict.items()])
+    ANTHROPIC_API_KEY = settings.get('api_key', '')
+    ANTHROPIC_API_MODELS = settings['Claude']
+    models_str = "\n".join([f"{key}:\t {value}" for key, value in ANTHROPIC_API_MODELS.items()])
+    HOST = settings.get('host', '')
+    PORT = int(str(settings.get('port', '')))
     settings.close()
-    return api_key, host, port, models_dict, models_str
+    logger.info(f"aidetour_utilities: load_settings: ANTHROPIC_API_MODELS={ANTHROPIC_API_MODELS}, {HOST}:{PORT}")
 
 def is_port_in_use(host, port):
     # note: these 3 host values all catch the error:
@@ -42,22 +43,23 @@ def is_port_in_use(host, port):
         return s.connect_ex((host, port)) == 0
 
 def show_splash_screen():
-    welcome_message = '''
-------------------------------------------------------------------------------
-Aidetour is an app that acts as a middleman between the OpenAI API and 
-the Anthropic Claude API. When Aidetour receives a request intended for the 
-OpenAI system, it translates that request into a proper Anthropic API request.
-The translated request is sent to the Anthropic API then waits for a response. 
-Once the response is received, Aidetour converts that back into an OpenAI API
-formatted streamed response.
-------------------------------------------------------------------------------
-1. Configure your Anthropic API key in .env file.
-2. Configure your host and port in config.ini file.
-3. Configure the Claude 3 models available from Anthropic.
-'''
-    welcome_message = '''\n
-                    Aidetour\n
-Anthropic API  <====> OpenAI API\n
+#     welcome_message = '''
+# ------------------------------------------------------------------------------
+# Aidetour is an app that acts as a middleman between the OpenAI API and 
+# the Anthropic Claude API. When Aidetour receives a request intended for the 
+# OpenAI system, it translates that request into a proper Anthropic API request.
+# The translated request is sent to the Anthropic API then waits for a response. 
+# Once the response is received, Aidetour converts that back into an OpenAI API
+# formatted streamed response.
+# ------------------------------------------------------------------------------
+# 1. Configure your Anthropic API key in .env file.
+# 2. Configure your host and port in config.ini file.
+# 3. Configure the Claude 3 models available from Anthropic.
+# '''
+    welcome_message = '''\n\n
+                        Aidetour\n
+'speaks like Sam; thinks like Claude'\n
+OpenAI API  <----> Anthropic API\n\n
 '''
     subprocess.Popen(['python', APP_SPLASH, APP_LOGO, welcome_message])
 
@@ -118,6 +120,7 @@ def resource_path(relative_path):
     return os.path.join(base_path, relative_path)
 
 def check_create_config_files():
+    return True
     config_files = [
         '.env',
         'config.ini',

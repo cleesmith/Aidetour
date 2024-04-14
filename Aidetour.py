@@ -81,17 +81,16 @@ def check_api_key():
         aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
         sys.exit(1) 
 
-
 def run_gui_version():
     import aidetour_gui
-    logging.info("GUI launched...")
-    app = aidetour_gui.Aidetour()
+    logger.info("GUI launched...")
+    app = aidetour_gui.GuiStuff(False)
     app.MainLoop()
 
 def run_cli_version():
-    logging.info(f"Starting {config.APP_NAME} in CLI mode...")
+    logger.info(f"Starting {config.APP_NAME} in CLI mode...")
     print("run_cli_version=", config.APP_NAME, config.APP_LOGO, config.HOST, config.PORT)
-    aidetour_api_handler.run_flask_app(HOST, PORT, ANTHROPIC_API_KEY)
+    aidetour_api_handler.run_flask_app()
 
 def ensure_config_directory():
     home_dir = os.path.expanduser('~')
@@ -124,18 +123,7 @@ if __name__ == '__main__':
 
     aidetour_utilities.load_settings()
 
-    # config_files_ok = aidetour_utilities.check_create_config_files()
-    # if not config_files_ok:
-    #     logger.error("Configuration files were created or updated. Please change and review them before running Aidetour again.")
-    #     print("Configuration files were created or updated. Please change and review them before running Aidetour again.")
-    #     sys.exit(1)
-
-    # aidetour_utilities.HOST, aidetour_utilities.PORT = aidetour_utilities.read_config_ini()
-
     check_api_key()
-
-    # models = aidetour_utilities.list_models()
-    # logger.info(models)
 
     if args.cli:
         run_cli_version()

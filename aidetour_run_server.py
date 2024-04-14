@@ -1,4 +1,6 @@
 import sys
+import time
+from datetime import datetime
 from loguru import logger
 from aidetour_api_handler import run_flask_app
 
@@ -7,7 +9,7 @@ import aidetour_logging
 from aidetour_logging import setup_logger
 import aidetour_utilities
 
-setup_logger('Server.log')
+setup_logger('Aidetour_Server.log')
 
 if __name__ == '__main__':
     logger.info("aidetour_run_server.py")

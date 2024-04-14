@@ -10,6 +10,7 @@ import subprocess
 import tkinter as tk
 from tkinter import messagebox
 
+# Aidetour modules:
 import aidetour_logging
 from aidetour_logging import setup_logger
 
@@ -17,10 +18,12 @@ APP_NAME = "Aidetour"
 APP_LOG = "Aidetour.log"
 APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash.py'
+RUN_SERVER = 'aidetour_run_server.py'
 HOST = None
 PORT = None
 ANTHROPIC_API_KEY = None
 ANTHROPIC_API_MODELS = None
+ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 
     
 def load_settings():
@@ -58,7 +61,7 @@ def show_splash_screen():
 # '''
     welcome_message = '''\n\n
                         Aidetour\n
-'speaks like Sam; thinks like Claude'\n
+'talks like Sam; thinks like Claude'\n
 OpenAI API  <----> Anthropic API\n\n
 '''
     subprocess.Popen(['python', APP_SPLASH, APP_LOGO, welcome_message])
@@ -180,28 +183,29 @@ def read_config_ini():
     logger.info(f"read_config_ini: config.ini: host={host} port={port}.")
     return host, port
 
-# Function to load models from models.ini and construct MODELS_DATA
 def load_models_data():
-    config = configparser.ConfigParser()
-    # config.optionxform = str
-    config.read('models.ini')
-
     models_data = {
         "data": [],
         "object": "list"
     }
 
-    # Assuming all models belong to 'anthropic' and have the same structure
-    for model_name, model_id in config['Claude'].items():
+    # assuming:
+    # ANTHROPIC_API_MODELS = {
+    #     'Opus': 'claude-3-opus-20240229', 
+    #     'Sonnet': 'claude-3-sonnet-20240229', 
+    #     'Haiku': 'claude-3-haiku-20240307'
+    # }
+
+    # iterate through the models in ANTHROPIC_API_MODELS
+    for model_name, model_id in ANTHROPIC_API_MODELS.items():
         model_data = {
             "id": model_id,
             "object": "model",
             "owned_by": "anthropic",
-            "permission": [{}]
+            "permission": [{}]  # Modify this as per your actual permissions requirements
         }
         models_data["data"].append(model_data)
 
-    # logger.info("load_models_data: models_data: %s", models_data)
     return models_data
 
 def list_models():

@@ -6,6 +6,7 @@ import socket
 import errno
 import subprocess
 from loguru import logger
+import textwrap
 import signal
 import argparse
 import time
@@ -53,7 +54,6 @@ import aidetour_utilities as config
 MAX_TOKENS = 100
 TEMPERATURE = 1
 STREAM_RESPONSE = True
-ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
 
 
@@ -65,13 +65,35 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # flask_app.logger.setLevel(logging.DEBUG)
 # logging.getLogger('flask_cors').level = logging.DEBUG
 
+# milliseconds since the Unix Epoch
+timestamp_milliseconds = int(time.time() * 1000)
+current_datetime = datetime.now()
+CHAT_LOG = f"{timestamp_milliseconds}_Aidetour_Chat_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.log"
+
+def chat_date_time():
+    return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
+
+def append_chat_message(message):
+    # open the log file in append mode, ensuring it creates a new file if it doesn't exist
+    with open(CHAT_LOG, "a") as file:
+        file.write(f"{message}\n")
+
+def extract_content_as_text(oai_data):
+    texts = []
+    for message in oai_data["messages"]:
+        role = message["role"]
+        content = message["content"]
+        wrapped_content = "\n".join(textwrap.wrap(content, 
+            width=60, 
+            break_long_words=False, replace_whitespace=False))
+        if role == "system":
+            texts.append(f"System: {wrapped_content}")
+        else:
+            texts.append(f"{role.title()}: {wrapped_content}")
+    append_chat_message("\n".join(texts))
 
 def run_flask_app():
     aidetour_utilities.load_settings()
-    # global ANTHROPIC_API_KEY
-    # ANTHROPIC_API_KEY = key
-    # global MODELS_DATA
-    # MODELS_DATA = aidetour_utilities.load_models_data()
     try:
         logger.info(f"run_flask_app: host={config.HOST} port={config.PORT}")
         serve(flask_app, host=config.HOST, port=config.PORT)
@@ -128,33 +150,35 @@ def create_error_response(error_type, message, status_code):
 # def cause_exception():
 #     raise Exception("*** exception raised by: /cause_exception ***")
 
-# Error handler for HTTP exceptions
-@flask_app.errorhandler(HTTPException)
-def handle_http_exception(e):
-    response = e.get_response()
-    # Log the error using the configured logger
-    logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
-    response.data = jsonify({
-        "type": e.name,
-        "message": e.description,
-    }).data
-    response.content_type = "application/json"
-    return response
+# # Error handler for HTTP exceptions
+# @flask_app.errorhandler(HTTPException)
+# def handle_http_exception(e):
+#     response = e.get_response()
+#     # Log the error using the configured logger
+#     logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
+#     response.data = jsonify({
+#         "type": e.name,
+#         "message": e.description,
+#     }).data
+#     response.content_type = "application/json"
+#     return response
 
-# Error handler for non-HTTP exceptions (catch-all)
-@flask_app.errorhandler(Exception)
-def handle_exception(e):
-    # Log the error using the configured logger
-    logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
-    return jsonify({
-        "type": "InternalServerError",
-        "message": "An unexpected error has occurred.",
-    }), 500
+# # Error handler for non-HTTP exceptions (catch-all)
+# @flask_app.errorhandler(Exception)
+# def handle_exception(e):
+#     # Log the error using the configured logger
+#     logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
+#     return jsonify({
+#         "type": "InternalServerError",
+#         "message": "An unexpected error has occurred.",
+#     }), 500
 
+# curl -X POST http://127.0.0.1:5600/v1/shutdown
 @flask_app.route('/v1/shutdown', methods=['POST'])
 def shutdown():
     logger.info("Received shutdown request")
-    return 'Server shutting down...'
+    sys.exit(1)
+    # return '', 200 # can't get to here, right?
 
 @flask_app.route('/v1/models', methods=['OPTIONS'])
 def chat_models():
@@ -174,7 +198,8 @@ def get_models():
     # response.headers.add('Access-Control-Allow-Headers', '*')
     # return response
     # return jsonify(MODELS_DATA)
-    return jsonify(ANTHROPIC_API_MODELS)
+    models = aidetour_utilities.load_models_data()
+    return jsonify(models)
 
 @flask_app.route('/v1/chat/completions', methods=['OPTIONS'])
 def chat_completions_options():
@@ -194,10 +219,12 @@ def chat_completions():
     oai_data = request.get_json()
     if oai_data is None:
         logger.info("\n400: error: Invalid JSON payload")
-        # FIXME = will this work with novelcrafter ?
         return jsonify({'error': 'Invalid JSON payload'}), 400
     logger.info(f"oai_data: {oai_data}")
-    
+
+    append_chat_message(f"___\nMe:  {chat_date_time()}\n")
+    extract_content_as_text(oai_data)
+
     claude_data = get_openai_request_data(oai_data)
     logger.info("\n\nConverted OpenAI API data to Claude API data:")
     logger.info(json.dumps(claude_data, indent=2))
@@ -207,16 +234,16 @@ def chat_completions():
         "anthropic-version": "2023-06-01",
         "anthropic-beta": "messages-2023-12-15",
         "content-type": "application/json",
-        "x-api-key": ANTHROPIC_API_KEY,
+        "x-api-key": config.ANTHROPIC_API_KEY,
     }
 
     keys_of_interest = ["anthropic-version", "anthropic-beta"]
     headers_to_print = ", ".join(f"{key}: {headers[key]}" for key in keys_of_interest if key in headers)
 
     # ************* post/send to Claude 3
-    claude_response = requests.post(ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
+    claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
     # *************
-    logger.info(f"\nPOST to URL: '{ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
+    logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
     logger.info(f">>> claude's response: {claude_response}")
 
     if claude_response.status_code != 200:
@@ -362,7 +389,7 @@ def chat_completions():
                         if event_data_json in ('message_start', 'content_block_start', 'content_block_delta', 'ping', 'content_block_stop', 'message_delta', 'message_stop', 'error'):
                             continue
 
-            logger.info(f"Finished streaming Claude's response as an OpenAI response: with a random message id set to {message_id} for a total of {line_count} events/lines processed/streamed.")
+            logger.info(f"*** Finished streaming Claude's response as an OpenAI response: with a random message id set to {message_id} for a total of {line_count} events/lines processed/streamed.")
 
         except Exception as e:
             logger.error(f"Error during streaming in generate_resp: {e}", exc_info=True)
@@ -373,7 +400,7 @@ def chat_completions():
             yield f"data: {error_message}\n\n"
 
     end_time = time.perf_counter()
-    logger.info(f"POST elapsed: {end_time - start_time:.6f} seconds")
+    logger.info(f"*** POST elapsed: {end_time - start_time:.6f} seconds")
 
     return Response(generate_resp(claude_response), mimetype='text/event-stream', direct_passthrough=True)
     # note: the original non-streamed approach:

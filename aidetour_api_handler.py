@@ -3,6 +3,7 @@
 import os
 import sys
 import socket
+import re
 import errno
 import subprocess
 from loguru import logger
@@ -54,11 +55,10 @@ import aidetour_utilities as config
 MAX_TOKENS = 100
 TEMPERATURE = 1
 STREAM_RESPONSE = True
-DEFAULT_MODEL = "claude-3-haiku-20240307"
 
 
 flask_app = Flask(__name__)
-# Enable CORS for all routes and origins
+# enable CORS for all routes and origins
 CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 
 # cls: these break typical logger.info, so only use for debugging:
@@ -68,7 +68,23 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # milliseconds since the Unix Epoch
 timestamp_milliseconds = int(time.time() * 1000)
 current_datetime = datetime.now()
-CHAT_LOG = f"{timestamp_milliseconds}_Aidetour_Chat_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.log"
+CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
+
+
+def clean_and_format_text(text):
+    # remove extra spaces around punctuation and within words
+    # text = re.sub(r'\s*([,.])\s*', r'\1 ', text)
+    # text = re.sub(r'\s*\*\*\s*', '', text)  # remove Markdown bold syntax (**)
+    # text = re.sub(r'\b(\w+)\s+\b', r'\1 ', text)
+    # text = re.sub(r'\s+', ' ', text)  # replace multiple spaces with a single space
+    # return text.strip()
+    text = re.sub(r'\s*([,.:;?!])\s*', r'\1 ', text)
+    text = re.sub(r'(\d+)\s*\.\s*', r'\n\n\1. ', text)
+    text = re.sub(r'\s*-\s*', r'\n   - ', text)
+    text = re.sub(r'\s+', ' ', text)
+    text = text.strip()
+    text = re.sub(r'(?<!\n\n)(\d+\.)', r'\n\n\1', text)
+    return text
 
 def chat_date_time():
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
@@ -92,11 +108,15 @@ def extract_content_as_text(oai_data):
             texts.append(f"{role.title()}: {wrapped_content}")
     append_chat_message("\n".join(texts))
 
+
 def run_flask_app():
     aidetour_utilities.load_settings()
     try:
         logger.info(f"run_flask_app: host={config.HOST} port={config.PORT}")
-        serve(flask_app, host=config.HOST, port=config.PORT)
+        #****
+        flask_app.run(host=config.HOST, port=config.PORT, debug=True)
+        # serve(flask_app, host=config.HOST, port=config.PORT)
+        #****
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
             logger.info(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
@@ -111,7 +131,7 @@ def generate_unique_string():
 
 def get_openai_request_data(openai_request):
     claude_data = {
-        "model": openai_request.get("model", DEFAULT_MODEL),
+        "model": openai_request.get("model", config.DEFAULT_MODEL),
         "messages": [],
         "max_tokens": openai_request.get("max_tokens", MAX_TOKENS),
         "temperature": openai_request.get("temperature", TEMPERATURE),
@@ -127,10 +147,9 @@ def get_openai_request_data(openai_request):
             claude_data["messages"].append({"role": role, "content": content})
 
     logger.info(f"openai request into claude_data: {claude_data}")
-
     return claude_data
 
-# Function to create a consistent error response format
+# function to create a consistent error response format
 def create_error_response(error_type, message, status_code):
     error_response = json.dumps({
         "type": "error",
@@ -246,6 +265,8 @@ def chat_completions():
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
     logger.info(f">>> claude's response: {claude_response}")
 
+    append_chat_message(f"\n___\nAI: {claude_model}:  {chat_date_time()}\n")
+
     if claude_response.status_code != 200:
         try:
             error_info = claude_response.json()
@@ -281,9 +302,10 @@ def chat_completions():
             yield "Connection: keep-alive\n".encode('utf-8')
             yield f"Date: {datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')}\n".encode('utf-8')
             yield "Transfer-Encoding: chunked\n".encode('utf-8')
-            yield "\n\n".encode('utf-8')  # Double newline to separate headers from response data
+            yield "\n\n".encode('utf-8')  # double newline to separate headers from response data
 
             line_count = 0
+            full_response = []
             message_id = generate_unique_string()
             # perhaps it's best to not log each of the streamed SSE events from Claude, but only when debugging
             for line in claude_response.iter_lines():
@@ -338,7 +360,10 @@ def chat_completions():
                                 }
 
                                 yield f"data: {json.dumps(transformed_data)}\n\n".encode('utf-8')
-                                yield "data: [DONE]\n\n".encode('utf-8') # cls? is this needed?
+                                # transformed_data_json = json.dumps(transformed_data).encode('utf-8')
+                                # response = b"data: " + transformed_data_json + b"\n\n"
+                                # yield response
+                                yield "data: [DONE]\n\n".encode('utf-8')
                                 continue
 
                             if event_data.get('type') == 'message_stop':
@@ -355,6 +380,9 @@ def chat_completions():
                                 }
 
                                 yield f"data: {json.dumps(transformed_data)}\n\n".encode('utf-8')
+                                # transformed_data_json = json.dumps(transformed_data).encode('utf-8')
+                                # response = b"data: " + transformed_data_json + b"\n\n"
+                                # yield response
                                 yield "data: [DONE]\n\n".encode('utf-8')
                                 continue
 
@@ -362,6 +390,9 @@ def chat_completions():
                                 # Transform to OpenAI API-like response for content_block_delta events
                                 # data: {"id":"xxx","object":"chat.completion.chunk","created":1710620490,"model":"claude-3-opus-20240229","choices":[{"index":0,"delta":{"role":"assistant","content":"El"},"finish_reason":null}]}
                                 # data: {"id":"xxx","object":"chat.completion.chunk","created":1710620490,"model":"claude-3-opus-20240229","choices":[{"index":0,"delta":{"role":"assistant","content":"mer"},"finish_reason":null}]}
+
+                                full_response.append(event_data['delta']['text'])
+
                                 transformed_data = {
                                     "id": message_id,
                                     "object": "chat.completion.chunk",
@@ -377,6 +408,9 @@ def chat_completions():
                                     }]
                                 }
                                 yield f"data: {json.dumps(transformed_data)}\n\n".encode('utf-8')
+                                # transformed_data_json = json.dumps(transformed_data).encode('utf-8')
+                                # response = b"data: " + transformed_data_json + b"\n\n"
+                                # yield response
 
                         except json.JSONDecodeError:
                             logger.info(f"Could not decode JSON from: {decoded_line}")
@@ -388,6 +422,32 @@ def chat_completions():
                         # this is the entire list of event messages, even if some are/were already handled:
                         if event_data_json in ('message_start', 'content_block_start', 'content_block_delta', 'ping', 'content_block_stop', 'message_delta', 'message_stop', 'error'):
                             continue
+
+            # Now, all streamed lines (really pieces of words) have 
+            # been received and converted to openai api responses, 
+            # let's log the full response in a more chat-like style.
+            # 
+            # join all pieces of text into one large string
+            append_chat_message(f"\n........full_response:\n{full_response}\n........\n")
+            full_response_string = ''.join(full_response)
+            append_chat_message(f"\n........full_response_string:\n{full_response_string}\n........\n")
+            # clean up and format the accumulated text
+            # cleaned_text = ' '.join(full_response_string.split())
+            # append_chat_message(f"\n........cleaned_text:\n{cleaned_text}\n........\n")
+            # wrapped_text = textwrap.fill(cleaned_text, width=80)
+            # wrapped_text = textwrap.fill(full_response_string, width=80)
+            # append_chat_message(f"\n........wrapped_text:\n{wrapped_text}\n........\n")
+            # final_text = clean_and_format_text(wrapped_text)
+
+            # append_chat_message(full_response_string)
+
+            # maybe the following "None's" help with memory issues 
+            # and garbage collection over long time periods of usage 
+            # ... as folk do when on-a-roll with AI chats
+            full_response_string = None
+            # cleaned_text = None
+            # wrapped_text = None
+            # final_text = None
 
             logger.info(f"*** Finished streaming Claude's response as an OpenAI response: with a random message id set to {message_id} for a total of {line_count} events/lines processed/streamed.")
 

@@ -4,9 +4,9 @@ import os
 import sys
 import shelve
 import subprocess
-from loguru import logger
 import time
 import requests
+from loguru import logger
 import wx
 from wx import svg
 from wx.adv import TaskBarIcon as TaskBarIcon

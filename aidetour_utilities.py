@@ -4,11 +4,11 @@ import os
 import shelve
 import socket
 import sys
-from loguru import logger
 import configparser
 import subprocess
 import tkinter as tk
 from tkinter import messagebox
+from loguru import logger
 
 # Aidetour modules:
 import aidetour_logging
@@ -130,4 +130,28 @@ def load_models_data():
         models_data["data"].append(model_data)
 
     return models_data
+
+def remove_markdown(text):
+    clean_lines = []
+    for line in text.split('\n'):
+        # adjusted regex to capture and keep punctuation next to the link
+        line = re.sub(r'\[([^\]]+)\]\(([^)]+)\)([,.])?', lambda m: f"{m.group(1)} ({m.group(2)}){m.group(3) if m.group(3) else ''}", line)
+        # remove bold and italic Markdown
+        line = re.sub(r'\*\*([^*]+)\*\*', r'\1', line)
+        line = re.sub(r'\*([^*]+)\*', r'\1', line)
+        # remove Markdown headers
+        line = re.sub(r'#+\s*(.*)', r'\1', line)
+        clean_lines.append(line)
+    return '\n'.join(clean_lines)
+
+def wrap_text(text, width=70):
+    wrapped_text = []
+    lines = text.split('\n')
+    for line in lines:
+        if line.strip() == '':
+            wrapped_text.append('')
+        else:
+            wrapped_text.append(textwrap.fill(line, width=width, replace_whitespace=False))
+
+    return '\n'.join(wrapped_text)
 

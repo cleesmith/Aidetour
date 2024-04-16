@@ -12,3 +12,4 @@ Requests==2.31.0
 waitress==3.0.0
 Werkzeug==3.0.1
 wxPython==4.2.1
+strip_markdown

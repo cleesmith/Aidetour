@@ -2,23 +2,22 @@
 
 import os
 import sys
-import socket
 import re
+import textwrap
+import socket
 import errno
 import subprocess
-from loguru import logger
-import textwrap
 import signal
 import argparse
 import time
 import uuid
-import logging
 import json
 import configparser
 import subprocess
 import threading
 from threading import Event
 from datetime import datetime, timezone
+from loguru import logger
 
 # April 2024: Aidetour now uses Waitress to serve the Flask app; Claude 3 Opus said this:
 """
@@ -70,21 +69,6 @@ timestamp_milliseconds = int(time.time() * 1000)
 current_datetime = datetime.now()
 CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
 
-
-def clean_and_format_text(text):
-    # remove extra spaces around punctuation and within words
-    # text = re.sub(r'\s*([,.])\s*', r'\1 ', text)
-    # text = re.sub(r'\s*\*\*\s*', '', text)  # remove Markdown bold syntax (**)
-    # text = re.sub(r'\b(\w+)\s+\b', r'\1 ', text)
-    # text = re.sub(r'\s+', ' ', text)  # replace multiple spaces with a single space
-    # return text.strip()
-    text = re.sub(r'\s*([,.:;?!])\s*', r'\1 ', text)
-    text = re.sub(r'(\d+)\s*\.\s*', r'\n\n\1. ', text)
-    text = re.sub(r'\s*-\s*', r'\n   - ', text)
-    text = re.sub(r'\s+', ' ', text)
-    text = text.strip()
-    text = re.sub(r'(?<!\n\n)(\d+\.)', r'\n\n\1', text)
-    return text
 
 def chat_date_time():
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
@@ -149,19 +133,6 @@ def get_openai_request_data(openai_request):
     logger.info(f"openai request into claude_data: {claude_data}")
     return claude_data
 
-# function to create a consistent error response format
-def create_error_response(error_type, message, status_code):
-    error_response = json.dumps({
-        "type": "error",
-        "error": {
-            "type": error_type,
-            "status_code": status_code,  # Include the actual status code
-            "message": message
-        }
-    })
-    return Response(error_response, status=status_code, mimetype='application/json')
-
-
 # start API code ...
 
 # raise an error, like bad route, for testing only
@@ -169,28 +140,28 @@ def create_error_response(error_type, message, status_code):
 # def cause_exception():
 #     raise Exception("*** exception raised by: /cause_exception ***")
 
-# # Error handler for HTTP exceptions
-# @flask_app.errorhandler(HTTPException)
-# def handle_http_exception(e):
-#     response = e.get_response()
-#     # Log the error using the configured logger
-#     logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
-#     response.data = jsonify({
-#         "type": e.name,
-#         "message": e.description,
-#     }).data
-#     response.content_type = "application/json"
-#     return response
+# Error handler for HTTP exceptions
+@flask_app.errorhandler(HTTPException)
+def handle_http_exception(e):
+    response = e.get_response()
+    # Log the error using the configured logger
+    logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
+    response.data = jsonify({
+        "type": e.name,
+        "message": e.description,
+    }).data
+    response.content_type = "application/json"
+    return response
 
-# # Error handler for non-HTTP exceptions (catch-all)
-# @flask_app.errorhandler(Exception)
-# def handle_exception(e):
-#     # Log the error using the configured logger
-#     logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
-#     return jsonify({
-#         "type": "InternalServerError",
-#         "message": "An unexpected error has occurred.",
-#     }), 500
+# Error handler for non-HTTP exceptions (catch-all)
+@flask_app.errorhandler(Exception)
+def handle_exception(e):
+    # Log the error using the configured logger
+    logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
+    return jsonify({
+        "type": "InternalServerError",
+        "message": "An unexpected error has occurred.",
+    }), 500
 
 # curl -X POST http://127.0.0.1:5600/v1/shutdown
 @flask_app.route('/v1/shutdown', methods=['POST'])
@@ -259,11 +230,11 @@ def chat_completions():
     keys_of_interest = ["anthropic-version", "anthropic-beta"]
     headers_to_print = ", ".join(f"{key}: {headers[key]}" for key in keys_of_interest if key in headers)
 
-    # ************* post/send to Claude 3
+    # ************* post/send to Anthropic API
     claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
     # *************
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
-    logger.info(f">>> claude's response: {claude_response}")
+    logger.info(f">>> Anthropic's response: {claude_response}")
 
     append_chat_message(f"\n___\nAI: {claude_model}:  {chat_date_time()}\n")
 
@@ -287,7 +258,16 @@ def chat_completions():
         )
         error_message = detailed_message if detailed_message != 'No detailed message provided.' else default_message
         logger.error(f"Error calling Anthropic API: Status code {claude_response.status_code}, Message: {error_message}")
-        return create_error_response(error_type, error_message, claude_response.status_code)
+        error_response = json.dumps({
+            "type": "error",
+            "error": {
+                "type": error_type,
+                "status_code": claude_response.status_code,
+                "message": error_message
+            }
+        })
+        logger.error(f"After POST with non-200 status code, so returning Response: status code: {claude_response.status_code} error_response:\n{error_response}")
+        return Response(error_response, status=claude_response.status_code, mimetype='application/json')
 
     def generate_resp(claude_response):
         # see: https://docs.anthropic.com/claude/reference/messages-streaming
@@ -423,31 +403,31 @@ def chat_completions():
                         if event_data_json in ('message_start', 'content_block_start', 'content_block_delta', 'ping', 'content_block_stop', 'message_delta', 'message_stop', 'error'):
                             continue
 
-            # Now, all streamed lines (really pieces of words) have 
-            # been received and converted to openai api responses, 
-            # let's log the full response in a more chat-like style.
-            # 
-            # join all pieces of text into one large string
-            append_chat_message(f"\n........full_response:\n{full_response}\n........\n")
-            full_response_string = ''.join(full_response)
-            append_chat_message(f"\n........full_response_string:\n{full_response_string}\n........\n")
-            # clean up and format the accumulated text
-            # cleaned_text = ' '.join(full_response_string.split())
-            # append_chat_message(f"\n........cleaned_text:\n{cleaned_text}\n........\n")
-            # wrapped_text = textwrap.fill(cleaned_text, width=80)
-            # wrapped_text = textwrap.fill(full_response_string, width=80)
-            # append_chat_message(f"\n........wrapped_text:\n{wrapped_text}\n........\n")
-            # final_text = clean_and_format_text(wrapped_text)
-
-            # append_chat_message(full_response_string)
+            try:
+                # Now, all streamed lines (really pieces of words) have 
+                # been received and converted to openai api responses, 
+                # let's log the full response in a more chat-like style.
+                # 
+                append_chat_message(f"\n........full_response:\n{full_response}\n........\n")
+                # join all pieces of text into one large string
+                full_response_string = ''.join(full_response)
+                append_chat_message(f"\n........full_response_string:\n{full_response_string}\n........\n")
+                # try to remove most Markdown, but keep hyperlinks
+                clean_text = aidetour_utilities.remove_markdown(full_response_string)
+                # wrap text at 70 characters per line so it's easier to read for users
+                final_text = aidetour_utilities.wrap_text(clean_text)
+                append_chat_message(f"\n........final_text:\n{final_text}\n........\n")
+            except Exception as e:
+                # since the stream from Anthropic API has been fully yielded as 
+                # an OpenAI API response, don't yield at this point just log error
+                logger.error(f"Error during streaming in generate_resp: {e}", exc_info=True)
 
             # maybe the following "None's" help with memory issues 
             # and garbage collection over long time periods of usage 
             # ... as folk do when on-a-roll with AI chats
             full_response_string = None
-            # cleaned_text = None
-            # wrapped_text = None
-            # final_text = None
+            clean_text = None
+            final_text = None
 
             logger.info(f"*** Finished streaming Claude's response as an OpenAI response: with a random message id set to {message_id} for a total of {line_count} events/lines processed/streamed.")
 

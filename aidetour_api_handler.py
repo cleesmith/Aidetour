@@ -400,7 +400,7 @@ def chat_completions():
                 clean_text = aidetour_utilities.remove_markdown(full_response_string)
                 # wrap text at 70 characters per line so it's easier to read for users
                 final_text = aidetour_utilities.wrap_text(clean_text)
-                append_chat_message(final_text)
+                append_chat_message(f"{final_text}\n")
             except Exception as e:
                 # since the stream from Anthropic API has been fully yielded as 
                 # an OpenAI API response, don't yield at this point just log error

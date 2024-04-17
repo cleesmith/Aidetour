@@ -4,6 +4,8 @@ import os
 import shelve
 import socket
 import sys
+import re
+import textwrap
 import configparser
 import subprocess
 import tkinter as tk

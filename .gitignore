@@ -17,6 +17,8 @@ mule*
 shelve*
 hopo*
 menu*
+Anthropic*
+anthropic*
 
 # PyInstaller stuff:
 build/

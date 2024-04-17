@@ -2,7 +2,6 @@
 
 import os
 import sys
-import re
 import textwrap
 import socket
 import errno
@@ -85,7 +84,8 @@ def extract_content_as_text(oai_data):
         content = message["content"]
         wrapped_content = "\n".join(textwrap.wrap(content, 
             width=60, 
-            break_long_words=False, replace_whitespace=False))
+            break_long_words=False, 
+            replace_whitespace=False))
         if role == "system":
             texts.append(f"System: {wrapped_content}")
         else:
@@ -241,22 +241,22 @@ def chat_completions():
     if claude_response.status_code != 200:
         try:
             error_info = claude_response.json()
-            detailed_message = error_info.get('message', 'No detailed message provided.')
+            claude_response.detailed_message = error_info.get('message', 'No detailed message provided.')
         except ValueError:
-            detailed_message = 'Response was not in JSON format.'
+            claude_response.detailed_message = None # 'Response was not in JSON format.'
         error_mappings = {
-            401: ("authentication_error", "There's an issue with your API key.\n Quit the app Aidetour and check your settings"),
-            403: ("permission_error", "Your API key does not have permission to use the specified resource."),
-            404: ("not_found_error", "The requested resource was not found."),
-            429: ("rate_limit_error", "Your account has hit a rate limit."),
-            500: ("api_error", "An unexpected error has occurred internal to Anthropic's systems."),
-            529: ("overloaded_error", "Anthropic's API is temporarily overloaded, try again later.")
+            401: ("Unauthorized",           "There's an issue with your API key.\n Quit the app Aidetour and check your settings"),
+            403: ("Forbidden",              "Your API key does not have permission to use the specified resource."),
+            404: ("Not Found",              "The requested resource was not found."),
+            429: ("Too Many Requests",      "Your account has hit a rate limit."),
+            500: ("Internal Server Error",  "An unexpected error has occurred internal to Anthropic's systems."),
+            529: ("Site is overloaded",     "Anthropic's API is temporarily overloaded, try again later.")
         }
         error_type, default_message = error_mappings.get(
             claude_response.status_code, 
             ("unexpected_error", f"An unexpected error occurred with status code {claude_response.status_code}.")
         )
-        error_message = detailed_message if detailed_message != 'No detailed message provided.' else default_message
+        error_message = f"Message: {default_message} Claude Message: {claude_response.detailed_message}"
         logger.error(f"Error calling Anthropic API: Status code {claude_response.status_code}, Message: {error_message}")
         error_response = json.dumps({
             "type": "error",
@@ -267,6 +267,7 @@ def chat_completions():
             }
         })
         logger.error(f"After POST with non-200 status code, so returning Response: status code: {claude_response.status_code} error_response:\n{error_response}")
+        append_chat_message(f"ERROR: status code: {claude_response.status_code} error:\n{error_response}\n")
         return Response(error_response, status=claude_response.status_code, mimetype='application/json')
 
     def generate_resp(claude_response):
@@ -295,23 +296,6 @@ def chat_completions():
                     decoded_line = line.decode('utf-8')
 
                     if "error" in decoded_line:
-                        # from: Anthropic API error events:
-                        # We may occasionally send errors in the event stream. 
-                        # For example, during periods of high usage, you may receive an overloaded_error, 
-                        # which would normally correspond to an HTTP 529 in a non-streaming context:
-                        # event: error
-                        # data: {"type": "error", "error": {"type": "overloaded_error", "message": "Overloaded"}}
-                        #
-                        # https://community.openai.com/t/status-code-503-that-model-is-currently-overloaded-with-other-requests/31433
-                        # OpenAI API status code 503
-                        # {
-                        #   "error": {
-                        #     "message": "That model is currently overloaded with other requests. You can retry your request, or contact us through our help center at help.openai.com if the error persists. (Please include the request ID 7ef84fe5909aa6768fb8d39a081a5ccc in your message.)",
-                        #     "type": "server_error",
-                        #     "param": null,
-                        #     "code": null
-                        #   }
-                        # }
                         continue # the next response line received should be "data: ...overloaded_error..."
 
                     if "message_start" in decoded_line:
@@ -402,29 +386,30 @@ def chat_completions():
                         # this is the entire list of event messages, even if some are/were already handled:
                         if event_data_json in ('message_start', 'content_block_start', 'content_block_delta', 'ping', 'content_block_stop', 'message_delta', 'message_stop', 'error'):
                             continue
+                # end -> if line:
+            # end -> for line in claude_response.iter_lines():
 
             try:
-                # Now, all streamed lines (really pieces of words) have 
-                # been received and converted to openai api responses, 
-                # let's log the full response in a more chat-like style.
+                # Now, all streamed (SSE) lines from Claude, really pieces of words, 
+                # have been received and converted to openai api responses and yielded, 
+                # let's log the full response in a more chat-like style in chat log text file.
                 # 
-                append_chat_message(f"\n........full_response:\n{full_response}\n........\n")
                 # join all pieces of text into one large string
                 full_response_string = ''.join(full_response)
-                append_chat_message(f"\n........full_response_string:\n{full_response_string}\n........\n")
-                # try to remove most Markdown, but keep hyperlinks
+                # remove most of the Markdown, but keep hyperlinks
                 clean_text = aidetour_utilities.remove_markdown(full_response_string)
                 # wrap text at 70 characters per line so it's easier to read for users
                 final_text = aidetour_utilities.wrap_text(clean_text)
-                append_chat_message(f"\n........final_text:\n{final_text}\n........\n")
+                append_chat_message(final_text)
             except Exception as e:
                 # since the stream from Anthropic API has been fully yielded as 
                 # an OpenAI API response, don't yield at this point just log error
                 logger.error(f"Error during streaming in generate_resp: {e}", exc_info=True)
 
-            # maybe the following "None's" help with memory issues 
+            # maybe the following None's help with memory issues 
             # and garbage collection over long time periods of usage 
             # ... as folk do when on-a-roll with AI chats
+            full_response = None
             full_response_string = None
             clean_text = None
             final_text = None

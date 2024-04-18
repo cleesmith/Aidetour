@@ -14,6 +14,6 @@ import aidetour_utilities as config
 setup_logger(config.SERVER_LOG)
 
 if __name__ == '__main__':
-    logger.info(config.RUN_SERVER)
+    logger.info(f"{config.RUN_SERVER}: attempting to run flask app.")
 
-    run_flask_app()
+    run_flask_app()  # see: aidetour_api_handler

@@ -42,12 +42,19 @@ def load_settings():
     settings.close()
 
 def is_port_in_use(host, port):
-    # note: these 3 host values all catch the error:
-    # host = 'localhost'
-    # host = '0.0.0.0'
-    # host = '127.0.0.1'
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        return s.connect_ex((host, int(port))) == 0
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.settimeout(1)  # 1 seconds timeout coz all local
+            result = s.connect_ex((host, int(port)))
+            if result == 0:
+                logger.info(f"Port {port} on {host} is in use.")
+                return True
+            else:
+                logger.info(f"Port {port} on {host} is not in use.")
+                return False
+    except Exception as e:
+        logger.error(f"Error checking port {host}:{port} - {e}")
+        return False
 
 def show_splash_screen():
     welcome_message = '''\n\n

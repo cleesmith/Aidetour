@@ -69,6 +69,24 @@ current_datetime = datetime.now()
 CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
 
 
+def run_flask_app():
+    aidetour_utilities.load_settings()
+    try:
+        logger.info(f"run_flask_app: attempting to use: host={config.HOST} port={config.PORT}")
+        #******
+        # flask_app.run(host=config.HOST, port=config.PORT, debug=True)
+        serve(flask_app, host=config.HOST, port=config.PORT)
+        #******
+    except OSError as e:
+        if e.errno == errno.EADDRINUSE:
+            logger.error(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
+        elif e.errno == errno.EADDRNOTAVAIL:
+            logger.error(f"Error: Can't assign requested address {config.HOST}:{config.PORT}. Check if the IP is configured on your machine.")
+        else:
+            logger.error(f"run_flask_app: OSError: {e}")
+    except Exception as e:
+        logger.error(f"run_flask_app: Error: {config.HOST}:{config.PORT} except Exception as e:\n{e}")
+
 def chat_date_time():
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
 
@@ -91,19 +109,6 @@ def extract_content_as_text(oai_data):
         else:
             texts.append(f"{role.title()}: {wrapped_content}")
     append_chat_message("\n".join(texts))
-
-
-def run_flask_app():
-    aidetour_utilities.load_settings()
-    try:
-        logger.info(f"run_flask_app: host={config.HOST} port={config.PORT}")
-        #****
-        flask_app.run(host=config.HOST, port=config.PORT, debug=True)
-        # serve(flask_app, host=config.HOST, port=config.PORT)
-        #****
-    except OSError as e:
-        if e.errno == errno.EADDRINUSE:
-            logger.info(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
 
 def generate_unique_string():
     unique_id = str(uuid.uuid4())

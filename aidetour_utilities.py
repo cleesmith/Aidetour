@@ -4,6 +4,7 @@ import os
 import shelve
 import socket
 import sys
+import platform
 import re
 import textwrap
 import configparser
@@ -20,6 +21,7 @@ APP_NAME = "Aidetour"
 APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash.py'
 APP_LOG = "Log_aidetour.txt"
+APP_SETTINGS_LOCATION = None
 SERVER_LOG = "Server_log_aidetour.txt"
 RUN_SERVER = 'aidetour_run_server.py'
 HOST = None
@@ -29,17 +31,73 @@ ANTHROPIC_API_MODELS = None
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
 
-    
+
+def create_default_settings_db():
+    default_settings = {
+        'host': '127.0.0.1',
+        'port': 5600,
+        'api_key': 'your_api_key_here',
+        'Claude': {
+            'Opus': 'claude-3-opus-20240229',
+            'Sonnet': 'claude-3-sonnet-20240229',
+            'Haiku': 'claude-3-haiku-20240307'
+        }
+    }
+
+    db_name = f"{APP_NAME}_Settings"
+
+    # define the home directory for each platform
+    if platform.system() == 'Windows':
+        home_dir = os.path.expanduser('~')
+    elif platform.system() == 'Darwin':  # macOS
+        home_dir = os.path.expanduser('~/Documents/Aidetour')
+    else:  # Linux
+        home_dir = os.path.expanduser('~/.config')
+
+    # create the database directory if it doesn't exist
+    db_dir = home_dir
+    if not os.path.exists(db_dir):
+        os.makedirs(db_dir)
+    db_location = os.path.join(db_dir, db_name)
+
+    print(f"create_default_settings_db: db_location={db_location}")
+
+    # open the Shelve db using flag='n' which means:
+    #   if the Shelve db does not exist, it will be created,
+    #   and if it already exists, its contents will be discarded,
+    #   and it will be recreated:
+    with shelve.open(db_location, flag='n') as settings:
+        settings.update(default_settings)
+        settings.close()
+
+    # global is needed to alter the existing value:
+    global APP_SETTINGS_LOCATION, HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+    APP_SETTINGS_LOCATION = db_location
+    HOST = default_settings['host']
+    PORT = default_settings['port']
+    ANTHROPIC_API_KEY = default_settings['api_key']
+    ANTHROPIC_API_MODELS = default_settings['Claude']
+
 def load_settings():
     # required to assign a new value to any global value:
-    global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
-    settings = shelve.open(f"{APP_NAME}_Settings")
-    ANTHROPIC_API_KEY = settings.get('api_key', '')
-    ANTHROPIC_API_MODELS = settings['Claude']
-    models_str = "\n".join([f"{key}:\t {value}" for key, value in ANTHROPIC_API_MODELS.items()])
-    HOST = settings.get('host', '')
-    PORT = str(settings.get('port', ''))
-    settings.close()
+    global APP_SETTINGS_LOCATION, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
+
+    try:
+        print(f"load_settings: try: APP_SETTINGS_LOCATION={APP_SETTINGS_LOCATION}")
+        settings = shelve.open(APP_SETTINGS_LOCATION)
+    except Exception as e:
+        create_default_settings_db()
+        print(f"load_settings: after create_default_settings_db: APP_SETTINGS_LOCATION={APP_SETTINGS_LOCATION}")
+        settings = shelve.open(APP_SETTINGS_LOCATION)
+        print(f"load_settings: after create_default_settings_db: settings.get('host')={settings.get('host')}")
+
+    try:
+        ANTHROPIC_API_KEY = settings.get('api_key')
+        ANTHROPIC_API_MODELS = settings.get('Claude', {})
+        HOST = settings.get('host')
+        PORT = str(settings.get('port'))
+    finally:
+        settings.close()
 
 def is_port_in_use(host, port):
     try:

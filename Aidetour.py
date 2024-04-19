@@ -63,23 +63,23 @@ import aidetour_utilities as config
 
 
 def check_api_key():
-    # Check if the API key is missing or empty
+    # check if the API key is missing or empty
     if config.ANTHROPIC_API_KEY is None or config.ANTHROPIC_API_KEY.strip() == '':
         error_message = "ERROR\n\n"
         error_message += "The ANTHROPIC_API_KEY is missing or empty!"
         error_message += "More details are provided in the README file for this app."
         logger.error(error_message)
         aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
-        sys.exit(1) 
+        # sys.exit(1) 
 
-    # Check if the API key is the placeholder value
+    # check if the API key is the placeholder value
     if config.ANTHROPIC_API_KEY == 'your_api_key_here':
         error_message = "ERROR\n\n"
         error_message += "Please replace the 'your_api_key_here' with your Anthropic API key, then run this app again.\n\n"
         error_message += "More details are provided in the README file for this app."
         logger.error(error_message)
         aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
-        sys.exit(1) 
+        # sys.exit(1) 
 
 def run_gui_version():
     import aidetour_gui
@@ -119,11 +119,22 @@ if __name__ == '__main__':
     parser.add_argument('--cli', action='store_true', help=f"run {config.APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
-    config_dir = ensure_config_directory()
+    # config_dir = ensure_config_directory()
 
+# ??? this: APP_SETTINGS_LOCATION must be set before calling this:
     aidetour_utilities.load_settings()
+# something like this:
+# db_name = f"{APP_NAME}_Settings"
+# # define the home directory for each platform
+# if platform.system() == 'Windows':
+#     home_dir = os.path.expanduser('~')
+# elif platform.system() == 'Darwin':  # macOS
+#     home_dir = os.path.expanduser('~/Documents/Aidetour')
+# else:  # Linux
+#     home_dir = os.path.expanduser('~/.config')
 
-    check_api_key()
+
+    # check_api_key()
 
     if args.cli:
         run_cli_version()

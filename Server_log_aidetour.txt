@@ -1,3 +1,2 @@
-2024-04-18 17:14:08.958 | INFO     | __main__:<module>:17 - aidetour_run_server.py: attempting to run flask app.
-2024-04-18 17:14:08.959 | INFO     | aidetour_api_handler:run_flask_app:75 - run_flask_app: attempting to use: host=127.0.0.2 port=5600
-2024-04-18 17:14:08.959 | ERROR    | aidetour_api_handler:run_flask_app:84 - Error: Can't assign requested address 127.0.0.2:5600. Check if the IP is configured on your machine.
+2024-04-19 16:40:14.840 | INFO     | __main__:<module>:17 - aidetour_run_server.py: attempting to run flask app.
+2024-04-19 16:40:14.842 | INFO     | aidetour_api_handler:run_flask_app:75 - run_flask_app: attempting to use: host=127.0.0.1 port=5600

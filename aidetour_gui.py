@@ -30,7 +30,7 @@ def start_server():
         config.HOST, 
         str(config.PORT), 
         config.ANTHROPIC_API_KEY])
-    logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}")
+    logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
 def stop_server():
     if sys.platform == 'win32':
@@ -44,7 +44,7 @@ def stop_server():
 class SplitImageDialog(wx.Dialog):
     def __init__(self, parent, title, message, image_path, button_label="OK"):
         super().__init__(parent, title=title)
-        self.SetBackgroundColour(wx.Colour(30, 30, 30))
+        # self.SetBackgroundColour(wx.Colour(30, 30, 30))
         mainSizer = wx.BoxSizer(wx.HORIZONTAL)
         img = wx.Image(image_path, wx.BITMAP_TYPE_ANY)
         img = img.Scale(300, 200, wx.IMAGE_QUALITY_HIGH)
@@ -54,12 +54,12 @@ class SplitImageDialog(wx.Dialog):
         rightSizer = wx.BoxSizer(wx.VERTICAL)
         font = wx.Font(15, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         messageText = wx.StaticText(self, label=message)
-        messageText.SetFont(font)  # Set the font for the message text
-        messageText.SetForegroundColour(wx.WHITE)  # Set the text color to white
+        # messageText.SetFont(font)  # Set the font for the message text
+        # messageText.SetForegroundColour(wx.WHITE)  # Set the text color to white
         rightSizer.Add(messageText, 0, wx.ALL | wx.EXPAND, 5)
         aButton = wx.Button(self, label=button_label)
-        aButton.SetBackgroundColour(wx.Colour(60, 60, 60))  # Set the button background color
-        aButton.SetForegroundColour(wx.RED)  # Set the button text color to white
+        # aButton.SetBackgroundColour(wx.Colour(60, 60, 60))  # Set the button background color
+        # aButton.SetForegroundColour(wx.RED)  # Set the button text color to white
         aButton.Bind(wx.EVT_BUTTON, lambda event: self.EndModal(wx.ID_OK))
         rightSizer.AddStretchSpacer(prop=1)
         rightSizer.Add(aButton, 0, wx.LEFT, 5)
@@ -89,189 +89,151 @@ class AlertsDialog(wx.Dialog):
         self.Destroy()
 
 
-# class SettingsDialog(wx.Dialog):
-#     def __init__(self, parent, title):
-#         super(SettingsDialog, self).__init__(parent, title=title, size=(350, 480))
-#         panel = wx.Panel(self)
-#         vbox = wx.BoxSizer(wx.VERTICAL)
-        
-#         # Standard text controls without custom styling
-#         self.host = wx.TextCtrl(panel)
-#         self.port = wx.TextCtrl(panel)
-#         self.api_key = wx.TextCtrl(panel)
-#         self.models = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
-        
-#         # Simple labels without custom fonts or colors
-#         vbox.Add(wx.StaticText(panel, -1, 'Your Local API Server'), flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(self.host, flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(self.port, flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(wx.StaticText(panel, -1, 'Your Anthropic API Key:'), flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(self.api_key, flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models:'), flag=wx.EXPAND|wx.ALL, border=10)
-#         vbox.Add(self.models, flag=wx.EXPAND|wx.ALL, border=10)
-
-#         # Simplified button layout
-#         hbox = wx.BoxSizer(wx.HORIZONTAL)
-#         okButton = wx.Button(panel, label='Ok')
-#         restartButton = wx.Button(panel, label='Restart Server')
-#         closeButton = wx.Button(panel, label='Cancel')
-#         hbox.Add(okButton, flag=wx.RIGHT, border=10)
-#         hbox.Add(restartButton, flag=wx.LEFT|wx.RIGHT, border=10)
-#         hbox.Add(closeButton, flag=wx.LEFT, border=10)
-#         vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.ALL, border=10)
-
-#         panel.SetSizer(vbox)
-        
-#         # Event bindings
-#         self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
-#         self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
-#         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
-
-#         self.load_settings_for_dialog()
-
-#     def load_settings_for_dialog(self):
-#         # Load settings into dialog fields, simplifying without logging
-#         self.api_key.SetValue(config.ANTHROPIC_API_KEY)
-#         models_str = "As of April 2024; this list may not be changed.\n\n"
-#         models_str += "\n".join([f"{key}: {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
-#         self.models.SetValue(models_str)
-#         self.host.SetValue(config.HOST)
-#         self.port.SetValue(str(config.PORT))
-
-#     def OnSave(self, event):
-#         settings = shelve.open(f"{config.APP_NAME}_Settings")
-#         settings['api_key'] = self.api_key.GetValue()
-#         settings['host'] = self.host.GetValue()
-#         settings['port'] = int(self.port.GetValue())
-#         settings.close()
-#         self.Destroy()
-
-#     def OnRestart(self, event):
-#         # save settings
-#         settings = shelve.open(f"{config.APP_NAME}_Settings")
-#         settings['api_key'] = self.api_key.GetValue()
-#         settings['host'] = self.host.GetValue()
-#         settings['port'] = int(self.port.GetValue())
-#         settings.close()
-#         stop_server()
-#         aidetour_utilities.load_settings()
-#         start_server()
-#         self.Destroy()
-
-#     def OnClose(self, event):
-#         self.Destroy()
-
-
 class SettingsDialog(wx.Dialog):
     def __init__(self, parent, title):
-        super(SettingsDialog, self).__init__(parent, 
-            title=title, 
-            size=(350, 480))
-        
+        super(SettingsDialog, self).__init__(parent, title=title, size=(350, 480))
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
         
-        self.host = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        self.port = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        self.models = wx.TextCtrl(panel, 
-            pos=(10, 10), 
-            size=(300, 120), 
-            style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
-        self.models.SetBackgroundColour("DARK GRAY")
-        self.models.SetForegroundColour("WHEAT")
+        self.host = wx.TextCtrl(panel)
+        self.port = wx.TextCtrl(panel)
+        self.api_key = wx.TextCtrl(panel)
+        self.models = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
         
-        vbox.AddSpacer(5)
+        vbox.Add(wx.StaticText(panel, -1, 'Local API Server IP:'), flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(self.host, flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(self.port, flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(wx.StaticText(panel, -1, 'Your Anthropic API Key:'), flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(self.api_key, flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models:'), flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(self.models, flag=wx.EXPAND|wx.ALL, border=10)
 
-        label00 = wx.StaticText(panel, -1, 'Your Local API Server', style=wx.ALIGN_CENTER)
-        label00.SetForegroundColour('SEA GREEN')
-        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        label00.SetFont(font)
-        vbox.Add(label00, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(2)
-
-        # label0 = wx.StaticText(panel, -1, 
-        #     '"talks like Sam; thinks like Claude"',
-        #     style=wx.ALIGN_CENTER)
-        # label0.SetForegroundColour('WHEAT')
-        # font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
-        #     faceName="Comic Sans MS")
-        # label0.SetFont(font)
-        # vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(3)
-
-        label1 = wx.StaticText(panel, -1, 'Host:', style=wx.LEFT)
-        label1.SetForegroundColour('SEA GREEN')
-        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        label1.SetFont(font)
-        vbox.Add(label1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.Add(self.host, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(10)
-
-        label2 = wx.StaticText(panel, -1, 'Port:', style=wx.LEFT)
-        label2.SetForegroundColour('SEA GREEN')
-        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        label2.SetFont(font)
-        vbox.Add(label2, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.Add(self.port, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(10)
-
-        hbox = wx.BoxSizer(wx.HORIZONTAL)
-        hbox.Add((10, -1), proportion=0)  # Left margin, adjust '20' as needed for indentation
-        line = wx.Panel(panel, -1, size=(330, 2))  # Adjust '100' to required width, '2' for height
-        line.SetBackgroundColour('SIENNA')
-        hbox.Add(line, proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
-        hbox.Add((20, -1), proportion=0)  # Right margin, adjust '20' as needed
-        vbox.Add(hbox, proportion=0, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
-        vbox.AddSpacer(10)
-
-        label3 = wx.StaticText(panel, -1, 'Your Anthropic API Key:', style=wx.LEFT)
-        label3.SetForegroundColour('FIREBRICK')
-        font = wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_EXTRABOLD)
-        label3.SetFont(font)
-        vbox.Add(label3, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(5)
-        vbox.Add(self.api_key, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(20)
-
-        label4 = wx.StaticText(panel, -1, 'Claude 3 models', style=wx.ALIGN_CENTER)
-        label4.SetForegroundColour('WHEAT')
-        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        label4.SetFont(font)
-        vbox.Add(label4, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        vbox.AddSpacer(5)
-        vbox.Add(self.models, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-
-        # bottom row of buttons:
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(panel, label='Ok')
-        hbox.Add(okButton)
         restartButton = wx.Button(panel, label='Restart Server')
-        hbox.Add(restartButton, flag=wx.LEFT, border=15)
         closeButton = wx.Button(panel, label='Cancel')
-        hbox.Add(closeButton, flag=wx.LEFT, border=15)
-        vbox.AddSpacer(20)
-        vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=5)
+        hbox.Add(okButton, flag=wx.RIGHT, border=10)
+        hbox.Add(restartButton, flag=wx.LEFT|wx.RIGHT, border=10)
+        hbox.Add(closeButton, flag=wx.LEFT, border=10)
+        vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.ALL, border=10)
+
         panel.SetSizer(vbox)
+        
         self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
         self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
-        vbox.AddSpacer(50)
 
-        self.load_settings_for_dialog()
-    
-    def load_settings_for_dialog(self):
+        # super(SettingsDialog, self).__init__(parent, 
+        #     title=title, 
+        #     size=(350, 480))
+        
+        # panel = wx.Panel(self)
+        # vbox = wx.BoxSizer(wx.VERTICAL)
+        
+        # self.host = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
+        # self.port = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
+        # self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
+        # self.models = wx.TextCtrl(panel, 
+        #     pos=(10, 10), 
+        #     size=(300, 120), 
+        #     style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
+        # self.models.SetBackgroundColour("DARK GRAY")
+        # self.models.SetForegroundColour("WHEAT")
+        
+        # vbox.AddSpacer(5)
+
+        # label00 = wx.StaticText(panel, -1, 'Your Local API Server', style=wx.ALIGN_CENTER)
+        # label00.SetForegroundColour('SEA GREEN')
+        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        # label00.SetFont(font)
+        # vbox.Add(label00, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(2)
+
+        # # label0 = wx.StaticText(panel, -1, 
+        # #     '"talks like Sam; thinks like Claude"',
+        # #     style=wx.ALIGN_CENTER)
+        # # label0.SetForegroundColour('WHEAT')
+        # # font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
+        # #     faceName="Comic Sans MS")
+        # # label0.SetFont(font)
+        # # vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # # vbox.AddSpacer(3)
+
+        # label1 = wx.StaticText(panel, -1, 'Host:', style=wx.LEFT)
+        # label1.SetForegroundColour('SEA GREEN')
+        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        # label1.SetFont(font)
+        # vbox.Add(label1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.Add(self.host, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(10)
+
+        # label2 = wx.StaticText(panel, -1, 'Port:', style=wx.LEFT)
+        # label2.SetForegroundColour('SEA GREEN')
+        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        # label2.SetFont(font)
+        # vbox.Add(label2, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.Add(self.port, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(10)
+
+        # hbox = wx.BoxSizer(wx.HORIZONTAL)
+        # hbox.Add((10, -1), proportion=0)  # Left margin, adjust '20' as needed for indentation
+        # line = wx.Panel(panel, -1, size=(330, 2))  # Adjust '100' to required width, '2' for height
+        # line.SetBackgroundColour('SIENNA')
+        # hbox.Add(line, proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
+        # hbox.Add((20, -1), proportion=0)  # Right margin, adjust '20' as needed
+        # vbox.Add(hbox, proportion=0, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
+        # vbox.AddSpacer(10)
+
+        # label3 = wx.StaticText(panel, -1, 'Your Anthropic API Key:', style=wx.LEFT)
+        # label3.SetForegroundColour('FIREBRICK')
+        # font = wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_EXTRABOLD)
+        # label3.SetFont(font)
+        # vbox.Add(label3, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(5)
+        # vbox.Add(self.api_key, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(20)
+
+        # label4 = wx.StaticText(panel, -1, 'Claude 3 models', style=wx.ALIGN_CENTER)
+        # label4.SetForegroundColour('WHEAT')
+        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
+        # label4.SetFont(font)
+        # vbox.Add(label4, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+        # vbox.AddSpacer(5)
+        # vbox.Add(self.models, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
+
+        # # bottom row of buttons:
+        # hbox = wx.BoxSizer(wx.HORIZONTAL)
+        # okButton = wx.Button(panel, label='Ok')
+        # hbox.Add(okButton)
+        # restartButton = wx.Button(panel, label='Restart Server')
+        # hbox.Add(restartButton, flag=wx.LEFT, border=15)
+        # closeButton = wx.Button(panel, label='Cancel')
+        # hbox.Add(closeButton, flag=wx.LEFT, border=15)
+        # vbox.AddSpacer(20)
+        # vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=5)
+        # panel.SetSizer(vbox)
+        # self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
+        # self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
+        # self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
+        # vbox.AddSpacer(50)
+
+        # load most recent Settings for this dialog box:
         aidetour_utilities.load_settings()
         self.api_key.SetValue(config.ANTHROPIC_API_KEY)
+        # make the list of models more readable for users:
         models_str = "As of April 2024; this list may not be changed.\n\n"
         models_str += "\n".join([f"{key}:\t {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
         self.models.SetValue(models_str)
         self.host.SetValue(config.HOST)
         self.port.SetValue(config.PORT)
-    
+
     def OnSave(self, event):
-        settings = shelve.open(f"{config.APP_NAME}_Settings")
+        try:
+            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+        except Exception as e:
+            aidetour_utilities.create_default_settings_db()
+            settings = shelve.open(config.APP_SETTINGS_LOCATION)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = int(self.port.GetValue())
@@ -279,8 +241,11 @@ class SettingsDialog(wx.Dialog):
         self.Destroy()
     
     def OnRestart(self, event):
-        # save settings
-        settings = shelve.open(f"{config.APP_NAME}_Settings")
+        try:
+            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+        except Exception as e:
+            aidetour_utilities.create_default_settings_db()
+            settings = shelve.open(config.APP_SETTINGS_LOCATION)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = int(self.port.GetValue())
@@ -378,21 +343,27 @@ class MenuStuff(TaskBarIcon):
 
         self.frame = frame
 
+        global SERVER_PROCESS
         SERVER_PROCESS = None
-        # wx.MessageBox('spud!!!', 'Alert', wx.OK | wx.ICON_INFORMATION)
 
         if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
             self.abort_app()
         else:
             # this sets SERVER_PROCESS, so it can be terminated if needed:
             start_server()
+            print(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
 
         if SERVER_PROCESS is None:
-            # wx.CallAfter(show_alert, "Error starting the API Server. Please check the Settings.")
-            message = "Error starting the API Server. Please check the Settings."
-            show_alert()
-            # self.OnAlerts(None)
-            wx.MessageBox(message, 'Alert', wx.OK | wx.ICON_INFORMATION)
+            message = "\nError starting the API Server.\n\nPlease check the Settings.\n"
+            message += f"\n{config.HOST}:{config.PORT}\n"
+            # wx.MessageBox(message, 'Alert', wx.OK | wx.ICON_ERROR)
+            dlg = SplitImageDialog(None, 
+                config.APP_NAME, 
+                message,
+                aidetour_utilities.resource_path(config.APP_LOGO),
+                button_label="Ok")
+            dlg.ShowModal()
+            dlg.Destroy()
 
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
         self.alerts_dialog = None
@@ -416,15 +387,12 @@ class MenuStuff(TaskBarIcon):
 
     def OnAlerts(self, event):
         if not self.alerts_dialog or not self.alerts_dialog.IsShown():
-            self.alerts_dialog = AlertsDialog(None, 'Alert', 'This is an alert message.')
+            self.alerts_dialog = AlertsDialog(None, f"{config.APP_NAME} Alerts", 'This is an alert message.')
             self.alerts_dialog.Show()
-            # dlg = AlertsDialog(None, 'Alert', 'This is an alert message.')
-            # dlg.ShowModal()
-            # dlg.Destroy()
 
     def OnSettings(self, event):
         if not self.settings_dialog or not self.settings_dialog.IsShown():
-            self.settings_dialog = SettingsDialog(None, f"{config.APP_NAME}_Settings")
+            self.settings_dialog = SettingsDialog(None, f"{config.APP_NAME} Settings")
             self.settings_dialog.Show()
 
     def OnLogs(self, event):

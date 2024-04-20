@@ -47,7 +47,12 @@ import anthropic
 import aidetour_logging
 import aidetour_utilities
 # an alias to 'config.' instead of 'aidetour_utilities.'
-import aidetour_utilities as config 
+import aidetour_utilities as config
+
+# Note: the 'aidetour_utilities' and 'config' referred to here is 
+#       different because this is run in a subprocess, which
+#       is the same as being a separate app. These globals
+#       are not the same globals already set in Aidetour.py!
 
 
 MAX_TOKENS = 100
@@ -70,7 +75,11 @@ CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_dateti
 
 
 def run_flask_app():
+    global APP_SETTINGS_LOCATION
+    APP_SETTINGS_LOCATION = aidetour_utilities.set_app_settings_location()
     aidetour_utilities.load_settings()
+    aidetour_utilities.log_settings(logger)
+
     try:
         logger.info(f"run_flask_app: attempting to use: host={config.HOST} port={config.PORT}")
         #******
@@ -167,6 +176,12 @@ def handle_exception(e):
         "type": "InternalServerError",
         "message": "An unexpected error has occurred.",
     }), 500
+
+# curl -X GET http://localhost:5600/v1/ping
+@flask_app.route('/v1/ping', methods=['GET'])
+def ping():
+    logger.info("Received ping request")
+    return '', 200
 
 # curl -X POST http://127.0.0.1:5600/v1/shutdown
 @flask_app.route('/v1/shutdown', methods=['POST'])

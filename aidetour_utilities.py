@@ -31,6 +31,36 @@ ANTHROPIC_API_MODELS = None
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 DEFAULT_MODEL = "claude-3-haiku-20240307"
 
+def get_db_location():
+    db_name = f"{APP_NAME}_Settings"
+    return os.path.join(APP_SETTINGS_LOCATION, db_name)
+
+def log_settings(logger):
+    logger.info(f"APP_NAME: {APP_NAME}")
+    logger.info(f"APP_LOGO: {APP_LOGO}")
+    logger.info(f"APP_SPLASH: {APP_SPLASH}")
+    logger.info(f"APP_LOG: {APP_LOG}")
+    logger.info(f"APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    logger.info(f"SERVER_LOG: {SERVER_LOG}")
+    logger.info(f"RUN_SERVER: {RUN_SERVER}")
+    logger.info(f"HOST: {HOST}")
+    logger.info(f"PORT: {PORT}")
+    logger.info(f"ANTHROPIC_API_KEY: {ANTHROPIC_API_KEY}")
+    logger.info(f"ANTHROPIC_API_MODELS: {ANTHROPIC_API_MODELS}")
+    logger.info(f"ANTHROPIC_MESSAGES_API_URL: {ANTHROPIC_MESSAGES_API_URL}")
+    logger.info(f"DEFAULT_MODEL: {DEFAULT_MODEL}")
+
+def set_app_settings_location():
+    global APP_SETTINGS_LOCATION
+    # define the home directory for each platform
+    if platform.system() == 'Windows':
+        APP_SETTINGS_LOCATION = os.path.expanduser('~')
+    elif platform.system() == 'Darwin':  # macOS
+        APP_SETTINGS_LOCATION = os.path.expanduser('~/Documents/Aidetour')
+    else:  # Linux
+        APP_SETTINGS_LOCATION = os.path.expanduser('~/.config')
+    logger.info(f"set_app_settings_location(): APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    return APP_SETTINGS_LOCATION
 
 def create_default_settings_db():
     default_settings = {
@@ -45,22 +75,11 @@ def create_default_settings_db():
     }
 
     db_name = f"{APP_NAME}_Settings"
-
-    # define the home directory for each platform
-    if platform.system() == 'Windows':
-        home_dir = os.path.expanduser('~')
-    elif platform.system() == 'Darwin':  # macOS
-        home_dir = os.path.expanduser('~/Documents/Aidetour')
-    else:  # Linux
-        home_dir = os.path.expanduser('~/.config')
-
     # create the database directory if it doesn't exist
     db_dir = home_dir
     if not os.path.exists(db_dir):
         os.makedirs(db_dir)
-    db_location = os.path.join(db_dir, db_name)
-
-    print(f"create_default_settings_db: db_location={db_location}")
+    db_location = os.path.join(APP_SETTINGS_LOCATION, db_name)
 
     # open the Shelve db using flag='n' which means:
     #   if the Shelve db does not exist, it will be created,
@@ -71,7 +90,7 @@ def create_default_settings_db():
         settings.close()
 
     # global is needed to alter the existing value:
-    global APP_SETTINGS_LOCATION, HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+    # global APP_SETTINGS_LOCATION, HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
     APP_SETTINGS_LOCATION = db_location
     HOST = default_settings['host']
     PORT = default_settings['port']
@@ -80,16 +99,15 @@ def create_default_settings_db():
 
 def load_settings():
     # required to assign a new value to any global value:
-    global APP_SETTINGS_LOCATION, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
+    global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
+
+    db_location = get_db_location()
 
     try:
-        print(f"load_settings: try: APP_SETTINGS_LOCATION={APP_SETTINGS_LOCATION}")
-        settings = shelve.open(APP_SETTINGS_LOCATION)
+        settings = shelve.open(db_location)
     except Exception as e:
         create_default_settings_db()
-        print(f"load_settings: after create_default_settings_db: APP_SETTINGS_LOCATION={APP_SETTINGS_LOCATION}")
-        settings = shelve.open(APP_SETTINGS_LOCATION)
-        print(f"load_settings: after create_default_settings_db: settings.get('host')={settings.get('host')}")
+        settings = shelve.open(db_location)
 
     try:
         ANTHROPIC_API_KEY = settings.get('api_key')

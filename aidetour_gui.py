@@ -21,10 +21,12 @@ import aidetour_utilities
 # an alias to 'config.' instead of 'aidetour_utilities.'
 import aidetour_utilities as config 
 
+APP_STATUS_MESSAGES = None
 SERVER_PROCESS = None
 
 def start_server():
     global SERVER_PROCESS
+    logger.info(f"{config.HOST} {config.PORT} {type(config.PORT)} {config.RUN_SERVER}")
     SERVER_PROCESS = subprocess.Popen(['python', 
         config.RUN_SERVER,
         config.HOST, 
@@ -33,6 +35,7 @@ def start_server():
     logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
 def stop_server():
+    print(f"SERVER_PROCESS={SERVER_PROCESS}")
     if sys.platform == 'win32':
         SERVER_PROCESS.terminate()
     else:
@@ -69,23 +72,30 @@ class SplitImageDialog(wx.Dialog):
         self.Layout()
 
 
-class AlertsDialog(wx.Dialog):
+class StatusDialog(wx.Dialog):
     def __init__(self, parent, title, message):
-        super(AlertsDialog, self).__init__(parent, title=title)
-        self.init_ui(message)
-        self.SetSize((300, 200))
-        self.Centre()
-
-    def init_ui(self, message):
+        super(StatusDialog, self).__init__(parent, title=title, size=(600, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        
+        panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
-        message_label = wx.StaticText(self, label=message)
-        vbox.Add(message_label, flag=wx.ALL|wx.CENTER, border=10, proportion=1)
-        okButton = wx.Button(self, label='Ok')
-        okButton.Bind(wx.EVT_BUTTON, self.on_close)
-        vbox.Add(okButton, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=10)
-        self.SetSizer(vbox)
-
-    def on_close(self, event):
+        
+        self.log_text = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        self.log_text.SetFont(font)
+        vbox.Add(self.log_text, 1, wx.EXPAND | wx.ALL, 10)
+        
+        done_button = wx.Button(panel, label="Done")
+        done_button.Bind(wx.EVT_BUTTON, self.OnDone)
+        vbox.Add(done_button, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
+        
+        panel.SetSizer(vbox)
+        self.log_text.SetValue(message)
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+    
+    def OnClose(self, event):
+        self.Destroy()
+    
+    def OnDone(self, event):
         self.Destroy()
 
 
@@ -229,11 +239,12 @@ class SettingsDialog(wx.Dialog):
         self.port.SetValue(config.PORT)
 
     def OnSave(self, event):
+        db_location = aidetour_utilities.get_db_location()
         try:
-            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+            settings = shelve.open(db_location)
         except Exception as e:
             aidetour_utilities.create_default_settings_db()
-            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+            settings = shelve.open(db_location)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = int(self.port.GetValue())
@@ -241,11 +252,14 @@ class SettingsDialog(wx.Dialog):
         self.Destroy()
     
     def OnRestart(self, event):
+        global SERVER_PROCESS
+        print(f"SERVER_PROCESS={SERVER_PROCESS}")
+        db_location = aidetour_utilities.get_db_location()
         try:
-            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+            settings = shelve.open(db_location)
         except Exception as e:
             aidetour_utilities.create_default_settings_db()
-            settings = shelve.open(config.APP_SETTINGS_LOCATION)
+            settings = shelve.open(db_location)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = int(self.port.GetValue())
@@ -289,7 +303,7 @@ class LogsDialog(wx.Dialog):
                 logs = file.read()
                 self.log_text.SetValue(logs)
         except FileNotFoundError:
-            self.log_text.SetValue("Aidetour.log file not found.")
+            self.log_text.SetValue(f"{config.APP_LOG} file not found.")
     
     def OnClose(self, event):
         self.Destroy()
@@ -343,7 +357,9 @@ class MenuStuff(TaskBarIcon):
 
         self.frame = frame
 
-        global SERVER_PROCESS
+        global SERVER_PROCESS, APP_STATUS_MESSAGES
+        APP_STATUS_MESSAGES = ""
+        APP_STATUS_MESSAGES += "\n________________________________________\n"
         SERVER_PROCESS = None
 
         if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
@@ -351,44 +367,73 @@ class MenuStuff(TaskBarIcon):
         else:
             # this sets SERVER_PROCESS, so it can be terminated if needed:
             start_server()
-            print(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
+            logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
+
+        # FIXME !!!!!!!!!!!!!
+        # SERVER_PROCESS = None
 
         if SERVER_PROCESS is None:
-            message = "\nError starting the API Server.\n\nPlease check the Settings.\n"
-            message += f"\n{config.HOST}:{config.PORT}\n"
-            # wx.MessageBox(message, 'Alert', wx.OK | wx.ICON_ERROR)
-            dlg = SplitImageDialog(None, 
-                config.APP_NAME, 
-                message,
-                aidetour_utilities.resource_path(config.APP_LOGO),
-                button_label="Ok")
-            dlg.ShowModal()
-            dlg.Destroy()
+            APP_STATUS_MESSAGES += "\nError starting the API Server.\n"
+            APP_STATUS_MESSAGES += f"\nAttempted start of local server on: {config.HOST}:{config.PORT}\n"
+            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to change.\n"
+            APP_STATUS_MESSAGES += "\n________________________________________\n"
+            # dlg = SplitImageDialog(None, 
+            #     config.APP_NAME, 
+            #     message,
+            #     aidetour_utilities.resource_path(config.APP_LOGO),
+            #     button_label="Ok")
+            # dlg.ShowModal()
+            # dlg.Destroy()
 
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
-        self.alerts_dialog = None
+        self.status_dialog = None
         self.settings_dialog = None
         self.logs_dialog = None
         self.video_dialog = None
-        self.Bind(wx.EVT_MENU, self.OnAlerts, id=1)
+        self.Bind(wx.EVT_MENU, self.OnStatus,   id=1)
         self.Bind(wx.EVT_MENU, self.OnSettings, id=2)
-        self.Bind(wx.EVT_MENU, self.OnLogs, id=3)
-        self.Bind(wx.EVT_MENU, self.OnVideo, id=4)
-        self.Bind(wx.EVT_MENU, self.OnExit, id=5)
+        self.Bind(wx.EVT_MENU, self.OnLogs,     id=3)
+        self.Bind(wx.EVT_MENU, self.OnVideo,    id=4)
+        self.Bind(wx.EVT_MENU, self.OnExit,     id=5)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
-        menu.Append(1, 'Alerts')
+        menu.Append(1, 'Status')
         menu.Append(2, 'Settings')
         menu.Append(3, 'Log')
         menu.Append(4, 'Video')
         menu.Append(5, 'Exit')
         return menu
 
-    def OnAlerts(self, event):
-        if not self.alerts_dialog or not self.alerts_dialog.IsShown():
-            self.alerts_dialog = AlertsDialog(None, f"{config.APP_NAME} Alerts", 'This is an alert message.')
-            self.alerts_dialog.Show()
+    def OnStatus(self, event):
+        global APP_STATUS_MESSAGES
+        try:
+            time.sleep(1) # otherwise a bizarre error with a blank "e" happens
+            url = f"http://{config.HOST}:{config.PORT}/v1/ping"
+            logger.info(f"Ping: url={url}")
+            response = requests.get(url, timeout=1)
+            logger.info(f"Ping status code={response.status_code}")
+            if response.status_code == 200:
+                logger.info(f"Ping was successful status code={response.status_code}")
+            else:
+                msg = f"Failed to ping. Status code: {response.status_code}"
+                logger.info(msg)
+                APP_STATUS_MESSAGES += f"\n\n{msg}"
+                APP_STATUS_MESSAGES += "\n________________________________________\n"
+        except requests.exceptions.Timeout:
+            msg = f"Ping request timed out."
+            logger.info(msg)
+            APP_STATUS_MESSAGES += f"\n\n{msg}"
+            APP_STATUS_MESSAGES += "\n________________________________________\n"
+        except Exception as e:
+            msg = f"Error: pinging: {url}:\n{e}"
+            logger.info(msg)
+            APP_STATUS_MESSAGES += f"\n\n{msg}"
+            APP_STATUS_MESSAGES += "\n________________________________________\n"
+
+        if not self.status_dialog or not self.status_dialog.IsShown():
+            self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status", APP_STATUS_MESSAGES)
+            self.status_dialog.Show()
 
     def OnSettings(self, event):
         if not self.settings_dialog or not self.settings_dialog.IsShown():
@@ -445,6 +490,5 @@ class GuiStuff(wx.App):
     def OnInit(self):
         frame = wx.Frame(wx.Frame(None, size=(0, 0)))  # ensure it's properly hidden
         self.SetTopWindow(frame)
-        # wx.MessageBox('spud!!!', 'Alert', wx.OK | wx.ICON_INFORMATION)
         MenuStuff(frame)
         return True

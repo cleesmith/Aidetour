@@ -1,6 +1,23 @@
-2024-04-19 16:40:14.499 | INFO     | __main__:<module>:115 - Starting Aidetour...
-2024-04-19 16:40:14.526 | INFO     | __main__:run_gui_version:86 - GUI launched...
-2024-04-19 16:40:14.605 | INFO     | aidetour_utilities:is_port_in_use:111 - Port 5600 on 127.0.0.1 is not in use.
-2024-04-19 16:40:14.607 | INFO     | aidetour_gui:start_server:33 - Attempting to start API Server on 127.0.0.1:5600
+2024-04-20 17:05:30.881 | INFO     | __main__:<module>:109 - Starting Aidetour...
+2024-04-20 17:05:30.881 | INFO     | aidetour_utilities:set_app_settings_location:62 - set_app_settings_location(): APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
+2024-04-20 17:05:30.881 | INFO     | __main__:<module>:112 - APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
+2024-04-20 17:05:30.906 | INFO     | __main__:run_gui_version:87 - GUI launched...
+2024-04-20 17:05:30.983 | INFO     | aidetour_utilities:is_port_in_use:129 - Port 5600 on 127.0.0.1 is not in use.
+2024-04-20 17:05:30.983 | INFO     | aidetour_gui:start_server:29 - 127.0.0.1 5600 <class 'str'> aidetour_run_server.py
+2024-04-20 17:05:30.986 | INFO     | aidetour_gui:start_server:35 - Attempting to start API Server on 127.0.0.1:5600
 SERVER_PROCESS=<Popen: returncode: None args: ['python', 'aidetour_run_server.py', '127.0.0...>
-2024-04-19 16:40:39.018 | INFO     | aidetour_gui:stop_server:41 - Attempting to stop API Server.
+2024-04-20 17:05:30.986 | INFO     | aidetour_gui:__init__:370 - MenuStuff: *** SERVER_PROCESS=<Popen: returncode: None args: ['python', 'aidetour_run_server.py', '127.0.0...>
+2024-04-20 17:05:37.898 | INFO     | aidetour_gui:OnStatus:413 - Ping: url=http://127.0.0.1:5600/v1/ping
+2024-04-20 17:05:37.912 | INFO     | aidetour_gui:OnStatus:415 - Ping status code=200
+2024-04-20 17:05:37.912 | INFO     | aidetour_gui:OnStatus:417 - Ping was successful status code=200
+2024-04-20 17:05:47.381 | INFO     | aidetour_gui:OnStatus:413 - Ping: url=http://127.0.0.1:5600/v1/ping
+2024-04-20 17:05:47.388 | INFO     | aidetour_gui:OnStatus:415 - Ping status code=200
+2024-04-20 17:05:47.388 | INFO     | aidetour_gui:OnStatus:417 - Ping was successful status code=200
+2024-04-20 17:05:55.901 | INFO     | aidetour_gui:stop_server:44 - Attempting to stop API Server.
+2024-04-20 17:05:55.902 | INFO     | aidetour_gui:start_server:29 - 127.0.0.1 5600 <class 'str'> aidetour_run_server.py
+2024-04-20 17:05:55.909 | INFO     | aidetour_gui:start_server:35 - Attempting to start API Server on 127.0.0.1:5600
+SERVER_PROCESS=<Popen: returncode: None args: ['python', 'aidetour_run_server.py', '127.0.0...>
+2024-04-20 17:06:06.319 | INFO     | aidetour_gui:OnStatus:413 - Ping: url=http://127.0.0.1:5600/v1/ping
+2024-04-20 17:06:06.330 | INFO     | aidetour_gui:OnStatus:415 - Ping status code=200
+2024-04-20 17:06:06.330 | INFO     | aidetour_gui:OnStatus:417 - Ping was successful status code=200
+2024-04-20 17:06:40.244 | INFO     | aidetour_gui:stop_server:44 - Attempting to stop API Server.

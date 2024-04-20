@@ -41,6 +41,7 @@
 
 import os
 import sys
+import platform
 import subprocess
 import logging
 import signal
@@ -92,13 +93,6 @@ def run_cli_version():
     print("run_cli_version=", config.APP_NAME, config.APP_LOGO, config.HOST, config.PORT)
     aidetour_api_handler.run_flask_app()
 
-def ensure_config_directory():
-    home_dir = os.path.expanduser('~')
-    config_dir = os.path.join(home_dir, config.APP_NAME)
-    if not os.path.exists(config_dir):
-        os.makedirs(config_dir)
-    return config_dir
-
 def signal_handler(sig, frame):
     print("\nKeyboard interrupt received. Shutting down...")
     logger.info("Keyboard interrupt received. Shutting down...")
@@ -114,25 +108,15 @@ if __name__ == '__main__':
     setup_logger(config.APP_LOG)
     logger.info(f"Starting {config.APP_NAME}...")
 
+    aidetour_utilities.set_app_settings_location() # sets APP_SETTINGS_LOCATION
+    logger.info(f"APP_SETTINGS_LOCATION: {config.APP_SETTINGS_LOCATION}")
+
     # FIXME see AI for a command line way to allow user to edit Settings
     parser = argparse.ArgumentParser(description=f"{config.APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
     parser.add_argument('--cli', action='store_true', help=f"run {config.APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
-    # config_dir = ensure_config_directory()
-
-# ??? this: APP_SETTINGS_LOCATION must be set before calling this:
     aidetour_utilities.load_settings()
-# something like this:
-# db_name = f"{APP_NAME}_Settings"
-# # define the home directory for each platform
-# if platform.system() == 'Windows':
-#     home_dir = os.path.expanduser('~')
-# elif platform.system() == 'Darwin':  # macOS
-#     home_dir = os.path.expanduser('~/Documents/Aidetour')
-# else:  # Linux
-#     home_dir = os.path.expanduser('~/.config')
-
 
     # check_api_key()
 

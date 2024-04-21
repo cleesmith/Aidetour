@@ -1,18 +1,18 @@
-2024-04-20 17:05:56.118 | INFO     | __main__:<module>:17 - aidetour_run_server.py: attempting to run flask app.
-2024-04-20 17:05:56.118 | INFO     | aidetour_utilities:set_app_settings_location:62 - set_app_settings_location(): APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:39 - APP_NAME: Aidetour
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:40 - APP_LOGO: Aidetour.png
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:41 - APP_SPLASH: aidetour_splash.py
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:42 - APP_LOG: Log_aidetour.txt
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:43 - APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:44 - SERVER_LOG: Server_log_aidetour.txt
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:45 - RUN_SERVER: aidetour_run_server.py
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:46 - HOST: 127.0.0.1
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:47 - PORT: 5600
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:48 - ANTHROPIC_API_KEY: your_api_key_here
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:49 - ANTHROPIC_API_MODELS: {'Opus': 'claude-3-opus-20240229', 'Sonnet': 'claude-3-sonnet-20240229', 'Haiku': 'claude-3-haiku-20240307'}
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:50 - ANTHROPIC_MESSAGES_API_URL: https://api.anthropic.com/v1/messages
-2024-04-20 17:05:56.119 | INFO     | aidetour_utilities:log_settings:51 - DEFAULT_MODEL: claude-3-haiku-20240307
-2024-04-20 17:05:56.119 | INFO     | aidetour_api_handler:run_flask_app:84 - run_flask_app: attempting to use: host=127.0.0.1 port=5600
-2024-04-20 17:06:06.327 | INFO     | aidetour_api_handler:ping:183 - Received ping request
-2024-04-20 17:06:20.693 | INFO     | aidetour_api_handler:ping:183 - Received ping request
+2024-04-21 12:58:03.475 | INFO     | __main__:<module>:17 - aidetour_run_server.py: attempting to run flask app.
+2024-04-21 12:58:03.475 | INFO     | aidetour_utilities:set_app_settings_location:62 - set_app_settings_location(): APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:39 - APP_NAME: Aidetour
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:40 - APP_LOGO: Aidetour.png
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:41 - APP_SPLASH: aidetour_splash.py
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:42 - APP_LOG: Log_aidetour.txt
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:43 - APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:44 - SERVER_LOG: Server_log_aidetour.txt
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:45 - RUN_SERVER: aidetour_run_server.py
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:46 - HOST: 127.0.0.1
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:47 - PORT: 5600
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:48 - ANTHROPIC_API_KEY: your_api_key_here
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:49 - ANTHROPIC_API_MODELS: {'Opus': 'claude-3-opus-20240229', 'Sonnet': 'claude-3-sonnet-20240229', 'Haiku': 'claude-3-haiku-20240307'}
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:50 - ANTHROPIC_MESSAGES_API_URL: https://api.anthropic.com/v1/messages
+2024-04-21 12:58:03.476 | INFO     | aidetour_utilities:log_settings:51 - DEFAULT_MODEL: claude-3-haiku-20240307
+2024-04-21 12:58:03.476 | INFO     | aidetour_api_handler:run_flask_app:84 - run_flask_app: attempting to use: host=127.0.0.1 port=5600
+2024-04-21 12:58:10.727 | INFO     | aidetour_api_handler:ping:183 - Received ping request
+2024-04-21 13:12:09.677 | INFO     | aidetour_api_handler:ping:183 - Received ping request

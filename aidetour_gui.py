@@ -35,7 +35,6 @@ def start_server():
     logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
 def stop_server():
-    print(f"SERVER_PROCESS={SERVER_PROCESS}")
     if sys.platform == 'win32':
         SERVER_PROCESS.terminate()
     else:
@@ -253,7 +252,6 @@ class SettingsDialog(wx.Dialog):
     
     def OnRestart(self, event):
         global SERVER_PROCESS
-        print(f"SERVER_PROCESS={SERVER_PROCESS}")
         db_location = aidetour_utilities.get_db_location()
         try:
             settings = shelve.open(db_location)
@@ -359,7 +357,6 @@ class MenuStuff(TaskBarIcon):
 
         global SERVER_PROCESS, APP_STATUS_MESSAGES
         APP_STATUS_MESSAGES = ""
-        APP_STATUS_MESSAGES += "\n________________________________________\n"
         SERVER_PROCESS = None
 
         if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
@@ -377,19 +374,12 @@ class MenuStuff(TaskBarIcon):
             APP_STATUS_MESSAGES += f"\nAttempted start of local server on: {config.HOST}:{config.PORT}\n"
             APP_STATUS_MESSAGES += "\nClick on Settings in the menu to change.\n"
             APP_STATUS_MESSAGES += "\n________________________________________\n"
-            # dlg = SplitImageDialog(None, 
-            #     config.APP_NAME, 
-            #     message,
-            #     aidetour_utilities.resource_path(config.APP_LOGO),
-            #     button_label="Ok")
-            # dlg.ShowModal()
-            # dlg.Destroy()
 
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
-        self.status_dialog = None
+        self.status_dialog   = None
         self.settings_dialog = None
-        self.logs_dialog = None
-        self.video_dialog = None
+        self.logs_dialog     = None
+        self.video_dialog    = None
         self.Bind(wx.EVT_MENU, self.OnStatus,   id=1)
         self.Bind(wx.EVT_MENU, self.OnSettings, id=2)
         self.Bind(wx.EVT_MENU, self.OnLogs,     id=3)
@@ -408,31 +398,42 @@ class MenuStuff(TaskBarIcon):
     def OnStatus(self, event):
         global APP_STATUS_MESSAGES
         try:
-            time.sleep(1) # otherwise a bizarre error with a blank "e" happens
             url = f"http://{config.HOST}:{config.PORT}/v1/ping"
-            logger.info(f"Ping: url={url}")
+            time.sleep(1) # otherwise a bizarre error with a blank "e" happens (why?)
+            logger.info(f"Pinging: {url}")
             response = requests.get(url, timeout=1)
-            logger.info(f"Ping status code={response.status_code}")
+            logger.info(f"Ping status code: {response.status_code}")
             if response.status_code == 200:
-                logger.info(f"Ping was successful status code={response.status_code}")
+                APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}.  You are \"go at throttle up\"!"
+                logger.info(APP_STATUS_MESSAGES)
+                APP_STATUS_MESSAGES += "\n________________________________________\n"
             else:
-                msg = f"Failed to ping. Status code: {response.status_code}"
-                logger.info(msg)
-                APP_STATUS_MESSAGES += f"\n\n{msg}"
+                APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
+                APP_STATUS_MESSAGES += f"Pinging "
+                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}!"
+                APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+                logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
         except requests.exceptions.Timeout:
-            msg = f"Ping request timed out."
-            logger.info(msg)
-            APP_STATUS_MESSAGES += f"\n\n{msg}"
+            APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
+            APP_STATUS_MESSAGES += f"Pinging "
+            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping timed out!"
+            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+            logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
         except Exception as e:
-            msg = f"Error: pinging: {url}:\n{e}"
-            logger.info(msg)
-            APP_STATUS_MESSAGES += f"\n\n{msg}"
+            APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
+            APP_STATUS_MESSAGES += f"Pinging "
+            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed!\n"
+            APP_STATUS_MESSAGES += f"Exception as e:\n{e}"
+            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+            logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
 
+        # i'm bored with doing "pretty" so the above is "ugly" repetition, get over it, for now
+
         if not self.status_dialog or not self.status_dialog.IsShown():
-            self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status", APP_STATUS_MESSAGES)
+            self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages:", APP_STATUS_MESSAGES)
             self.status_dialog.Show()
 
     def OnSettings(self, event):

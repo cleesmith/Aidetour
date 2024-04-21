@@ -38,7 +38,7 @@ and adheres to the principle of using the best tool for each job.
 # API Flask Anthropic related:
 import requests
 from waitress import serve, task, create_server
-from flask import Flask, Response, jsonify, request, stream_with_context, make_response
+from flask import Flask, Response, jsonify, request, stream_with_context, make_response, abort
 from flask_cors import CORS
 from werkzeug.exceptions import HTTPException
 import anthropic
@@ -183,12 +183,17 @@ def ping():
     logger.info("Received ping request")
     return '', 200
 
-# curl -X POST http://127.0.0.1:5600/v1/shutdown
-@flask_app.route('/v1/shutdown', methods=['POST'])
+# curl -X GET http://127.0.0.1:5600/v1/shutdown
+@flask_app.route('/v1/shutdown', methods=['GET'])
 def shutdown():
-    logger.info("Received shutdown request")
-    sys.exit(1)
-    # return '', 200 # can't get to here, right?
+    pid = os.getpid()
+    logger.info(f"Received shutdown request, attempting to kill pid {pid} on platform \"{sys.platform}\".")
+    logger.remove()  # remove and close the logger
+    if sys.platform.startswith('win'):
+        os.kill(pid, signal.CTRL_C_EVENT)
+    else:
+        os.kill(pid, signal.SIGINT)
+    abort(200, 'Shutting down...')
 
 @flask_app.route('/v1/models', methods=['OPTIONS'])
 def chat_models():

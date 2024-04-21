@@ -35,12 +35,12 @@ def start_server():
     logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
 def stop_server():
+    logger.info(f"Attempting to stop API Server process on platform {sys.platform}.")
     if sys.platform == 'win32':
         SERVER_PROCESS.terminate()
     else:
         SERVER_PROCESS.terminate()
         SERVER_PROCESS.wait()
-    logger.info("Attempting to stop API Server.")
 
 
 class SplitImageDialog(wx.Dialog):
@@ -82,14 +82,26 @@ class StatusDialog(wx.Dialog):
         font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.log_text.SetFont(font)
         vbox.Add(self.log_text, 1, wx.EXPAND | wx.ALL, 10)
-        
+
+        clear_button = wx.Button(panel, label="Clear messages")
+        clear_button.Bind(wx.EVT_BUTTON, self.OnClear)
         done_button = wx.Button(panel, label="Done")
         done_button.Bind(wx.EVT_BUTTON, self.OnDone)
-        vbox.Add(done_button, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
-        
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        hbox.Add(clear_button, flag=wx.LEFT|wx.RIGHT, border=10)
+        # hbox.Add(done_button, flag=wx.LEFT, border=10)
+        hbox.Add(done_button, border=10)
+        vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.ALL, border=10)
+                
         panel.SetSizer(vbox)
         self.log_text.SetValue(message)
         self.Bind(wx.EVT_CLOSE, self.OnClose)
+    
+    def OnClear(self, event):
+        global APP_STATUS_MESSAGES
+        APP_STATUS_MESSAGES = ""
+        self.Destroy()
     
     def OnClose(self, event):
         self.Destroy()
@@ -109,14 +121,22 @@ class SettingsDialog(wx.Dialog):
         self.api_key = wx.TextCtrl(panel)
         self.models = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
         
-        vbox.Add(wx.StaticText(panel, -1, 'Local API Server IP:'), flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(self.host, flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(self.port, flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(wx.StaticText(panel, -1, 'Your Anthropic API Key:'), flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(self.api_key, flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models:'), flag=wx.EXPAND|wx.ALL, border=10)
-        vbox.Add(self.models, flag=wx.EXPAND|wx.ALL, border=10)
+        vbox.Add(wx.StaticText(panel, -1, 'Local API Server IP:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
+        vbox.Add(self.host, flag=wx.EXPAND|wx.ALL, border=5)
+        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+
+        vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
+        vbox.Add(self.port, flag=wx.EXPAND|wx.ALL, border=5)
+        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+
+        vbox.Add(wx.StaticText(panel, -1, 'Your Anthropic API Key:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
+        vbox.Add(self.api_key, flag=wx.EXPAND|wx.ALL, border=5)
+        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+
+        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
+        vbox.Add(self.models, flag=wx.EXPAND|wx.ALL, border=5)
+
+        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=1)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(panel, label='Ok')
@@ -132,100 +152,6 @@ class SettingsDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
         self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
-
-        # super(SettingsDialog, self).__init__(parent, 
-        #     title=title, 
-        #     size=(350, 480))
-        
-        # panel = wx.Panel(self)
-        # vbox = wx.BoxSizer(wx.VERTICAL)
-        
-        # self.host = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        # self.port = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        # self.api_key = wx.TextCtrl(panel, -1, style=wx.TE_PROCESS_ENTER, size=(200, -1))
-        # self.models = wx.TextCtrl(panel, 
-        #     pos=(10, 10), 
-        #     size=(300, 120), 
-        #     style=wx.TE_MULTILINE | wx.TE_READONLY | wx.HSCROLL)
-        # self.models.SetBackgroundColour("DARK GRAY")
-        # self.models.SetForegroundColour("WHEAT")
-        
-        # vbox.AddSpacer(5)
-
-        # label00 = wx.StaticText(panel, -1, 'Your Local API Server', style=wx.ALIGN_CENTER)
-        # label00.SetForegroundColour('SEA GREEN')
-        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        # label00.SetFont(font)
-        # vbox.Add(label00, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(2)
-
-        # # label0 = wx.StaticText(panel, -1, 
-        # #     '"talks like Sam; thinks like Claude"',
-        # #     style=wx.ALIGN_CENTER)
-        # # label0.SetForegroundColour('WHEAT')
-        # # font = wx.Font(12, wx.FONTFAMILY_SCRIPT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, 
-        # #     faceName="Comic Sans MS")
-        # # label0.SetFont(font)
-        # # vbox.Add(label0, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # # vbox.AddSpacer(3)
-
-        # label1 = wx.StaticText(panel, -1, 'Host:', style=wx.LEFT)
-        # label1.SetForegroundColour('SEA GREEN')
-        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        # label1.SetFont(font)
-        # vbox.Add(label1, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.Add(self.host, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(10)
-
-        # label2 = wx.StaticText(panel, -1, 'Port:', style=wx.LEFT)
-        # label2.SetForegroundColour('SEA GREEN')
-        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        # label2.SetFont(font)
-        # vbox.Add(label2, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.Add(self.port, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(10)
-
-        # hbox = wx.BoxSizer(wx.HORIZONTAL)
-        # hbox.Add((10, -1), proportion=0)  # Left margin, adjust '20' as needed for indentation
-        # line = wx.Panel(panel, -1, size=(330, 2))  # Adjust '100' to required width, '2' for height
-        # line.SetBackgroundColour('SIENNA')
-        # hbox.Add(line, proportion=0, flag=wx.ALIGN_CENTER_VERTICAL)
-        # hbox.Add((20, -1), proportion=0)  # Right margin, adjust '20' as needed
-        # vbox.Add(hbox, proportion=0, flag=wx.EXPAND|wx.TOP|wx.BOTTOM, border=10)
-        # vbox.AddSpacer(10)
-
-        # label3 = wx.StaticText(panel, -1, 'Your Anthropic API Key:', style=wx.LEFT)
-        # label3.SetForegroundColour('FIREBRICK')
-        # font = wx.Font(20, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_EXTRABOLD)
-        # label3.SetFont(font)
-        # vbox.Add(label3, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(5)
-        # vbox.Add(self.api_key, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(20)
-
-        # label4 = wx.StaticText(panel, -1, 'Claude 3 models', style=wx.ALIGN_CENTER)
-        # label4.SetForegroundColour('WHEAT')
-        # font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD)
-        # label4.SetFont(font)
-        # vbox.Add(label4, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-        # vbox.AddSpacer(5)
-        # vbox.Add(self.models, flag=wx.EXPAND|wx.LEFT|wx.RIGHT, border=10)
-
-        # # bottom row of buttons:
-        # hbox = wx.BoxSizer(wx.HORIZONTAL)
-        # okButton = wx.Button(panel, label='Ok')
-        # hbox.Add(okButton)
-        # restartButton = wx.Button(panel, label='Restart Server')
-        # hbox.Add(restartButton, flag=wx.LEFT, border=15)
-        # closeButton = wx.Button(panel, label='Cancel')
-        # hbox.Add(closeButton, flag=wx.LEFT, border=15)
-        # vbox.AddSpacer(20)
-        # vbox.Add(hbox, flag=wx.ALIGN_CENTER|wx.TOP|wx.BOTTOM, border=5)
-        # panel.SetSizer(vbox)
-        # self.Bind(wx.EVT_BUTTON, self.OnSave, okButton)
-        # self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
-        # self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
-        # vbox.AddSpacer(50)
 
         # load most recent Settings for this dialog box:
         aidetour_utilities.load_settings()
@@ -359,20 +285,21 @@ class MenuStuff(TaskBarIcon):
         APP_STATUS_MESSAGES = ""
         SERVER_PROCESS = None
 
-        if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
-            self.abort_app()
-        else:
-            # this sets SERVER_PROCESS, so it can be terminated if needed:
-            start_server()
-            logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
+        self.app_warning()
+        # if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
+        #     self.app_warning()
+        # else:
+        #     # this sets SERVER_PROCESS, so it can be terminated if needed:
+        #     start_server()
+        #     logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
 
         # FIXME !!!!!!!!!!!!!
         # SERVER_PROCESS = None
 
         if SERVER_PROCESS is None:
             APP_STATUS_MESSAGES += "\nError starting the API Server.\n"
-            APP_STATUS_MESSAGES += f"\nAttempted start of local server on: {config.HOST}:{config.PORT}\n"
-            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to change.\n"
+            APP_STATUS_MESSAGES += f"Attempted start of local server on: {config.HOST}:{config.PORT}\n"
+            APP_STATUS_MESSAGES += "Please click on Settings in the menu to change."
             APP_STATUS_MESSAGES += "\n________________________________________\n"
 
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
@@ -404,33 +331,33 @@ class MenuStuff(TaskBarIcon):
             response = requests.get(url, timeout=1)
             logger.info(f"Ping status code: {response.status_code}")
             if response.status_code == 200:
-                APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}.  You are \"go at throttle up\"!"
+                APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}. The server is \"5 by 5\" and \"go at throttle up\"!"
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
             else:
                 APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
                 APP_STATUS_MESSAGES += f"Pinging "
-                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}!"
-                APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}. \"The mains are offline\"!"
+                APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
         except requests.exceptions.Timeout:
             APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
             APP_STATUS_MESSAGES += f"Pinging "
-            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping timed out!"
-            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping timed out. \"A bridge too far\"!"
+            APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
         except Exception as e:
             APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
             APP_STATUS_MESSAGES += f"Pinging "
-            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed!\n"
+            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed. \"I'm sorry, Dave, I can't do that\"!\n"
             APP_STATUS_MESSAGES += f"Exception as e:\n{e}"
-            APP_STATUS_MESSAGES += "\nClick on Settings in the menu to correct."
+            APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
 
-        # i'm bored with doing "pretty" so the above is "ugly" repetition, get over it, for now
+        # yeah, i'm bored with doing "pretty" so the above is "ugly" repetition, get over it!
 
         if not self.status_dialog or not self.status_dialog.IsShown():
             self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages:", APP_STATUS_MESSAGES)
@@ -453,10 +380,17 @@ class MenuStuff(TaskBarIcon):
             self.video_dialog.Show()
 
     def OnExit(self, event=None):
-        global SERVER_PROCESS
-        if SERVER_PROCESS:
-            stop_server()
-            SERVER_PROCESS = None
+        url = f"http://{config.HOST}:{config.PORT}/v1/shutdown"
+        logger.info(f"Shutdown server at {url}")
+        try:
+            global SERVER_PROCESS
+            if SERVER_PROCESS:
+                stop_server()
+                SERVER_PROCESS = None
+            response = requests.get(url, timeout=1)
+        except Exception as e:
+            # look, the user wants out, exit/quit/whatever, so let them free
+            pass
 
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             self.tray_icon.RemoveIcon()
@@ -469,13 +403,9 @@ class MenuStuff(TaskBarIcon):
 
         wx.GetApp().ExitMainLoop()
 
-    def abort_app(self):
+    def app_warning(self):
         logger.info(f"ERROR: http://{config.HOST}:{config.PORT} is already in use!")
-        message = f"ERROR: \n\n\nhttp://{config.HOST}:{config.PORT} \n\n\n...is already in use!\n\n\nPlease check your {config.APP_NAME} configuration."
-        # ensure GUI operations are run in the main thread
-        wx.CallAfter(self.show_abort_dialog, message)
-
-    def show_abort_dialog(self, message):
+        message = f"ERROR: \n\nhttp://{config.HOST}:{config.PORT} \n\n...is already in use!\n\nPlease click on Settings in the menu to change."
         dialog = SplitImageDialog(None, 
                                   config.APP_NAME, 
                                   message, 
@@ -483,8 +413,6 @@ class MenuStuff(TaskBarIcon):
                                   button_label="Exit")
         dialog.ShowModal()
         dialog.Destroy()
-        self.on_exit(None)
-        sys.exit(1)
 
 
 class GuiStuff(wx.App):

@@ -19,6 +19,8 @@ hopo*
 menu*
 Anthropic*
 anthropic*
+Log*
+Server*
 
 # PyInstaller stuff:
 build/

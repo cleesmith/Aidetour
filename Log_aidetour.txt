@@ -1,6 +1,0 @@
-2024-04-22 10:28:10.108 | INFO     | __main__:<module>:109 - Starting Aidetour...
-2024-04-22 10:28:10.108 | INFO     | aidetour_utilities:set_app_settings_location:63 - set_app_settings_location(): APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
-2024-04-22 10:28:10.108 | INFO     | __main__:<module>:112 - APP_SETTINGS_LOCATION: /Users/cleesmith/Documents/Aidetour
-2024-04-22 10:28:10.133 | INFO     | __main__:run_gui_version:87 - GUI launched...
-2024-04-22 10:28:10.211 | INFO     | aidetour_gui:app_warning:407 - ERROR: http://127.0.0.1:5600 is already in use!
-2024-04-22 10:29:00.427 | INFO     | aidetour_gui:OnExit:384 - Shutdown server at http://127.0.0.1:5600/v1/shutdown

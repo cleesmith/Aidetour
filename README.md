@@ -3,7 +3,9 @@
 Aidetour is a Python application that acts as a middleman between the OpenAI API 
 and the Anthropic Claude API. It translates requests intended for the OpenAI system 
 into properly formatted Anthropic API requests, sends them to the Anthropic API, and 
-then converts the responses back into OpenAI API-formatted streamed responses.
+then converts the responses back into OpenAI API-formatted streamed responses. The
+app does not actually use an OpenAI API key, instead it uses your Anthropic API key 
+which is required.
 
 ## Features
 
@@ -11,6 +13,7 @@ then converts the responses back into OpenAI API-formatted streamed responses.
 - Support for multiple Claude models (e.g., Claude-3-Opus, Claude-3-Sonnet, Claude-3-Haiku)
 - Graphical user interface (GUI) for both macOS and Windows
 - Command-line interface (CLI) mode for terminal usage
+- A chat log of your requests and the Claude's responses.
 - Logging functionality for tracking application events and errors
 
 ## Installation

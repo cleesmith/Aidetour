@@ -121,22 +121,23 @@ class SettingsDialog(wx.Dialog):
         self.api_key = wx.TextCtrl(panel)
         self.models = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
         
+        vbox.AddSpacer(15)
+
         vbox.Add(wx.StaticText(panel, -1, 'Local API Server IP:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
         vbox.Add(self.host, flag=wx.EXPAND|wx.ALL, border=5)
-        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+        vbox.AddSpacer(10)
 
         vbox.Add(wx.StaticText(panel, -1, 'Port:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
         vbox.Add(self.port, flag=wx.EXPAND|wx.ALL, border=5)
-        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+        vbox.AddSpacer(10)
 
         vbox.Add(wx.StaticText(panel, -1, 'Your Anthropic API Key:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
         vbox.Add(self.api_key, flag=wx.EXPAND|wx.ALL, border=5)
-        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=0)
+        vbox.AddSpacer(20)
 
-        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models:'), flag=wx.ALIGN_LEFT|wx.ALL, border=5)
+        vbox.Add(wx.StaticText(panel, -1, 'Claude 3 models April 2024'), proportion=0, flag=wx.ALIGN_CENTER|wx.ALL, border=5)
         vbox.Add(self.models, flag=wx.EXPAND|wx.ALL, border=5)
-
-        vbox.Add(wx.StaticText(panel, -1, ''), flag=wx.EXPAND|wx.ALL, border=1)
+        vbox.AddSpacer(20)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
         okButton = wx.Button(panel, label='Ok')
@@ -157,8 +158,7 @@ class SettingsDialog(wx.Dialog):
         aidetour_utilities.load_settings()
         self.api_key.SetValue(config.ANTHROPIC_API_KEY)
         # make the list of models more readable for users:
-        models_str = "As of April 2024; this list may not be changed.\n\n"
-        models_str += "\n".join([f"{key}:\t {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
+        models_str = "\n".join([f"{key}:\t {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
         self.models.SetValue(models_str)
         self.host.SetValue(config.HOST)
         self.port.SetValue(config.PORT)

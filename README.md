@@ -13,7 +13,7 @@ which is required.
 - Support for multiple Claude models (e.g., Claude-3-Opus, Claude-3-Sonnet, Claude-3-Haiku)
 - Graphical user interface (GUI) for both macOS and Windows
 - Command-line interface (CLI) mode for terminal usage
-- A chat log of your requests and the Claude's responses.
+- A chat log of your requests and Claude's responses, as pairs of "Me:" and "AI:".
 - Logging functionality for tracking application events and errors
 
 ## Installation

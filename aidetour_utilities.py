@@ -77,7 +77,9 @@ def create_default_settings_db():
 
     db_name = f"{APP_NAME}_Settings"
     # create the database directory if it doesn't exist
-    db_dir = home_dir
+    db_dir = APP_SETTINGS_LOCATION
+    print(f"ncreate_default_settings_db: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    print(f"\ncreate_default_settings_db: db_dir={db_dir}\n")
     if not os.path.exists(db_dir):
         os.makedirs(db_dir)
     db_location = os.path.join(APP_SETTINGS_LOCATION, db_name)
@@ -98,25 +100,64 @@ def create_default_settings_db():
     ANTHROPIC_API_KEY = default_settings['api_key']
     ANTHROPIC_API_MODELS = default_settings['Claude']
 
+    print(f"\ncreate_default_settings_db: host={HOST}\n")
+
+
+# import os
+# import shelve
+
+# dir_path = '/Users/cleesmith/Documents/Aidetour'
+# filename = 'Aidetour_Settings'
+
+# # Ensure directory exists
+# os.makedirs(dir_path, exist_ok=True)
+
+# db_location = os.path.join(dir_path, filename)
+
+# try:
+#     with shelve.open(db_location) as shelf:
+#         print("Shelve exists")
+# except Exception as e:
+#     print(f"An error occurred: {e}")
+#     # Try to open with the 'c' flag to create the database if it doesn't exist
+#     with shelve.open(db_location, flag='c') as shelf:
+#         print("Shelve created")
+
+
+
 def load_settings():
     # required to assign a new value to any global value:
     global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
 
+    print(f"load_settings: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+
     db_location = get_db_location()
+    print(f"load_settings: db_location={db_location}")
 
     try:
-        settings = shelve.open(db_location)
-    except Exception as e:
-        create_default_settings_db()
-        settings = shelve.open(db_location)
+        print(f"try shelve open={db_location}")
+        with shelve.open(db_location) as shelf:
+            print("Shelve exists")
+    except FileNotFoundError:
+        print("Shelve doesn't exist")
 
-    try:
-        ANTHROPIC_API_KEY = settings.get('api_key')
-        ANTHROPIC_API_MODELS = settings.get('Claude', {})
-        HOST = settings.get('host')
-        PORT = str(settings.get('port'))
-    finally:
-        settings.close()
+    # try:
+    #     # open the Shelve db using flag='r' which means 
+    #     # to open an existing database for reading only, 
+    #     # an error is raised if the database does not exist:
+    #     print(f"\nload_settings: shelve.open({db_location}, flag='r')\n")
+    #     settings = shelve.open(db_location, flag='r')
+    # except Exception as e:
+    #     print(f"\nload_settings: Exception: shelve.open({db_location}, flag='r')\n")
+    #     create_default_settings_db()
+    #     settings = shelve.open(db_location)
+
+    ANTHROPIC_API_KEY = settings.get('api_key')
+    ANTHROPIC_API_MODELS = settings.get('Claude', {})
+    HOST = settings.get('host')
+    PORT = str(settings.get('port'))
+
+    settings.close()
 
 def is_port_in_use(host, port):
     try:

@@ -26,7 +26,7 @@ SERVER_PROCESS = None
 
 def start_server():
     global SERVER_PROCESS
-    logger.info(f"{config.HOST} {config.PORT} {type(config.PORT)} {config.RUN_SERVER}")
+    logger.info(f"{config.HOST} {config.PORT} type(config.PORT)={type(config.PORT)} {config.RUN_SERVER}")
     SERVER_PROCESS = subprocess.Popen(['python', 
         config.RUN_SERVER,
         config.HOST, 
@@ -285,13 +285,15 @@ class MenuStuff(TaskBarIcon):
         APP_STATUS_MESSAGES = ""
         SERVER_PROCESS = None
 
-        self.app_warning()
-        # if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
-        #     self.app_warning()
-        # else:
-        #     # this sets SERVER_PROCESS, so it can be terminated if needed:
-        #     start_server()
-        #     logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
+        # FIXME !!!!!!!!!!!!!
+        # self.app_warning()
+
+        if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
+            self.app_warning()
+        else:
+            # this sets SERVER_PROCESS, so it can be terminated if needed:
+            start_server()
+            logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
 
         # FIXME !!!!!!!!!!!!!
         # SERVER_PROCESS = None

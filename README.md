@@ -47,8 +47,8 @@ which is required.
   python Aidetour.py
   ```
 
-The application will start with a system tray icon. 
-Right-click on the systray (menu bar) icon to access the menu options:
+The application will start with a system tray or menu bar icon. 
+Click on the icon to access this app's menu options:
 - Status: Pings the local API server displays its status, as well as any other messages.
 - Settings: To change the local API server's listening IP and port, your Anthropic API key, a list of available Claude 3 models.
 - Log: Opens the app log file.

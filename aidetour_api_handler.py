@@ -266,11 +266,11 @@ def chat_completions():
     if claude_response.status_code != 200:
         try:
             error_info = claude_response.json()
-            claude_response.detailed_message = error_info.get('message', 'No detailed message provided.')
+            claude_response.detailed_message = error_info.get('message', 'No detailed message provided')
         except ValueError:
             claude_response.detailed_message = None # 'Response was not in JSON format.'
         error_mappings = {
-            401: ("Unauthorized",           "There's an issue with your API key.\n Quit the app Aidetour and check your settings"),
+            401: ("Unauthorized",           "There's an issue with your API key.\n Please check your Aidetour settings."),
             403: ("Forbidden",              "Your API key does not have permission to use the specified resource."),
             404: ("Not Found",              "The requested resource was not found."),
             429: ("Too Many Requests",      "Your account has hit a rate limit."),
@@ -281,7 +281,7 @@ def chat_completions():
             claude_response.status_code, 
             ("unexpected_error", f"An unexpected error occurred with status code {claude_response.status_code}.")
         )
-        error_message = f"Message: {default_message} Claude Message: {claude_response.detailed_message}"
+        error_message = f"Message: {default_message}\nClaude Message: {claude_response.detailed_message}"
         logger.error(f"Error calling Anthropic API: Status code {claude_response.status_code}, Message: {error_message}")
         error_response = json.dumps({
             "type": "error",

@@ -2,6 +2,7 @@
 
 import os
 import sys
+import json
 import shelve
 import subprocess
 import time
@@ -166,24 +167,66 @@ class SettingsDialog(wx.Dialog):
         self.host.SetValue(config.HOST)
         self.port.SetValue(config.PORT)
 
+    # def OnSave(self, event):
+    #     settings = shelve.open(config.APP_SETTINGS_LOCATION)
+    #     settings['api_key'] = self.api_key.GetValue()
+    #     settings['host'] = self.host.GetValue()
+    #     settings['port'] = self.port.GetValue()
+    #     settings.close()
+    #     self.Destroy()
     def OnSave(self, event):
-        settings = shelve.open(config.APP_SETTINGS_LOCATION)
+        settings_filename = config.APP_SETTINGS_LOCATION
+        try:
+            with open(settings_filename, 'r') as json_file:
+                settings = json.load(json_file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            # initialize settings if file is missing or corrupted
+            settings = {}
+
+        # update settings with values from GUI elements
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = self.port.GetValue()
-        settings.close()
+
+        # save the updated settings back to the JSON file
+        with open(settings_filename, 'w') as json_file:
+            json.dump(settings, json_file, indent=4)
+
         self.Destroy()
     
+    # def OnRestart(self, event):
+    #     global SERVER_PROCESS
+    #     settings = shelve.open(config.APP_SETTINGS_LOCATION)
+    #     settings['api_key'] = self.api_key.GetValue()
+    #     settings['host'] = self.host.GetValue()
+    #     settings['port'] = self.port.GetValue()
+    #     settings.close()
+    #     stop_server()
+    #     aidetour_utilities.load_settings()
+    #     start_server()
+    #     self.Destroy()
     def OnRestart(self, event):
         global SERVER_PROCESS
-        settings = shelve.open(config.APP_SETTINGS_LOCATION)
+        settings_filename = config.APP_SETTINGS_LOCATION
+
+        try:
+            with open(settings_filename, 'r') as json_file:
+                settings = json.load(json_file)
+        except (FileNotFoundError, json.JSONDecodeError):
+            # initialize settings if file is missing or corrupted
+            settings = {}
+
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
         settings['port'] = self.port.GetValue()
-        settings.close()
+
+        with open(settings_filename, 'w') as json_file:
+            json.dump(settings, json_file, indent=4)
+
         stop_server()
         aidetour_utilities.load_settings()
         start_server()
+
         self.Destroy()
     
     def OnClose(self, event):

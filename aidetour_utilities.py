@@ -6,6 +6,7 @@ import socket
 import sys
 import platform
 import re
+import json
 import textwrap
 import configparser
 import subprocess
@@ -72,11 +73,39 @@ def set_app_settings_location():
     logger.info(f"set_app_settings_location(): APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     return APP_SETTINGS_LOCATION
 
+# def create_default_settings_db():
+#     default_settings = {
+#         'host': '127.0.0.1',
+#         'port': '5600',
+#         'api_key': 'your_api_key_here',
+#         'Claude': {
+#             'Opus': 'claude-3-opus-20240229',
+#             'Sonnet': 'claude-3-sonnet-20240229',
+#             'Haiku': 'claude-3-haiku-20240307'
+#         }
+#     }
+
+#     #   if the Shelve db does not exist, it will be created,
+#     #   and if it already exists, its contents will be discarded,
+#     #   and it will be recreated:
+#     # with shelve.open(APP_SETTINGS_LOCATION, flag='n') as settings:
+#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
+#         settings.update(default_settings)
+#         settings.close()
+
+#     # global is required to alter the existing value:
+#     global HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
+#     HOST = default_settings['host']
+#     PORT = default_settings['port']
+#     ANTHROPIC_API_KEY = default_settings['api_key']
+#     ANTHROPIC_API_MODELS = default_settings['Claude']
 def create_default_settings_db():
     default_settings = {
         'host': '127.0.0.1',
         'port': '5600',
         'api_key': 'your_api_key_here',
+        'default_model': "claude-3-haiku-20240307",
+        'anthropic_messages_api_url': 'https://api.anthropic.com/v1/messages',
         'Claude': {
             'Opus': 'claude-3-opus-20240229',
             'Sonnet': 'claude-3-sonnet-20240229',
@@ -84,42 +113,63 @@ def create_default_settings_db():
         }
     }
 
-    #   if the Shelve db does not exist, it will be created,
-    #   and if it already exists, its contents will be discarded,
-    #   and it will be recreated:
-    # with shelve.open(APP_SETTINGS_LOCATION, flag='n') as settings:
-    with shelve.open(APP_SETTINGS_LOCATION) as settings:
-        settings.update(default_settings)
-        settings.close()
+    # save default settings to a JSON file, overwriting any existing file
+    with open(APP_SETTINGS_LOCATION, 'w') as json_file:
+        json.dump(default_settings, json_file, indent=4)
 
-    # global is required to alter the existing value:
+    # update global variables from the default settings
     global HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
     HOST = default_settings['host']
     PORT = default_settings['port']
     ANTHROPIC_API_KEY = default_settings['api_key']
     ANTHROPIC_API_MODELS = default_settings['Claude']
 
+
+# def load_settings():
+#     # required to assign a new value to any global value:
+#     global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
+
+#     set_app_settings_location() # sets APP_SETTINGS_LOCATION
+
+#     # this "check by double open db settings" works but seems dorky
+#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
+#         if settings.get('host'):
+#             pass
+#         else:
+#             # settings db never existed or whatever, so recreate it:
+#             create_default_settings_db()
+#         settings.close()
+
+#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
+#         ANTHROPIC_API_KEY = settings.get('api_key')
+#         ANTHROPIC_API_MODELS = settings.get('Claude', {})
+#         HOST = settings.get('host')
+#         PORT = settings.get('port')
+#         settings.close()
 def load_settings():
     # required to assign a new value to any global value:
     global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
 
     set_app_settings_location() # sets APP_SETTINGS_LOCATION
 
-    # this "check by double open db settings" works but seems dorky
-    with shelve.open(APP_SETTINGS_LOCATION) as settings:
-        if settings.get('host'):
-            pass
-        else:
-            # settings db never existed or whatever, so recreate it:
-            create_default_settings_db()
-        settings.close()
+    try:
+        with open(APP_SETTINGS_LOCATION, 'r') as json_file:
+            settings = json.load(json_file)
+    except (FileNotFoundError, json.JSONDecodeError):
+        create_default_settings_db()
+        with open(APP_SETTINGS_LOCATION, 'r') as json_file:
+            settings = json.load(json_file)
 
-    with shelve.open(APP_SETTINGS_LOCATION) as settings:
-        ANTHROPIC_API_KEY = settings.get('api_key')
-        ANTHROPIC_API_MODELS = settings.get('Claude', {})
-        HOST = settings.get('host')
-        PORT = settings.get('port')
-        settings.close()
+    # check if the settings are incomplete and reinitialize if necessary
+    if 'host' not in settings:
+        create_default_settings_db()
+        with open(APP_SETTINGS_LOCATION, 'r') as json_file:
+            settings = json.load(json_file)
+
+    ANTHROPIC_API_KEY = settings.get('api_key')
+    ANTHROPIC_API_MODELS = settings.get('Claude', {})
+    HOST = settings.get('host')
+    PORT = settings.get('port')
 
 def is_port_in_use(host, port):
     try:

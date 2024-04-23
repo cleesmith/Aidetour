@@ -24,13 +24,15 @@ import aidetour_utilities as config
 APP_STATUS_MESSAGES = None
 SERVER_PROCESS = None
 
+
 def start_server():
     global SERVER_PROCESS
     logger.info(f"{config.HOST} {config.PORT} type(config.PORT)={type(config.PORT)} {config.RUN_SERVER}")
+    # ************   ****************
     SERVER_PROCESS = subprocess.Popen(['python', 
         config.RUN_SERVER,
         config.HOST, 
-        str(config.PORT), 
+        config.PORT, 
         config.ANTHROPIC_API_KEY])
     logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
@@ -156,6 +158,7 @@ class SettingsDialog(wx.Dialog):
 
         # load most recent Settings for this dialog box:
         aidetour_utilities.load_settings()
+
         self.api_key.SetValue(config.ANTHROPIC_API_KEY)
         # make the list of models more readable for users:
         models_str = "\n".join([f"{key}:\t {value}" for key, value in config.ANTHROPIC_API_MODELS.items()])
@@ -164,29 +167,19 @@ class SettingsDialog(wx.Dialog):
         self.port.SetValue(config.PORT)
 
     def OnSave(self, event):
-        db_location = aidetour_utilities.get_db_location()
-        try:
-            settings = shelve.open(db_location)
-        except Exception as e:
-            aidetour_utilities.create_default_settings_db()
-            settings = shelve.open(db_location)
+        settings = shelve.open(config.APP_SETTINGS_LOCATION)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
-        settings['port'] = int(self.port.GetValue())
+        settings['port'] = self.port.GetValue()
         settings.close()
         self.Destroy()
     
     def OnRestart(self, event):
         global SERVER_PROCESS
-        db_location = aidetour_utilities.get_db_location()
-        try:
-            settings = shelve.open(db_location)
-        except Exception as e:
-            aidetour_utilities.create_default_settings_db()
-            settings = shelve.open(db_location)
+        settings = shelve.open(config.APP_SETTINGS_LOCATION)
         settings['api_key'] = self.api_key.GetValue()
         settings['host'] = self.host.GetValue()
-        settings['port'] = int(self.port.GetValue())
+        settings['port'] = self.port.GetValue()
         settings.close()
         stop_server()
         aidetour_utilities.load_settings()
@@ -274,6 +267,7 @@ class YouTubeDialog(wx.Dialog):
     def on_done_click(self, event):
         self.Close()
 
+
 class MenuStuff(TaskBarIcon):
     def __init__(self, frame):
         super(MenuStuff, self).__init__()
@@ -359,7 +353,7 @@ class MenuStuff(TaskBarIcon):
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
 
-        # yeah, i'm bored with doing "pretty" so the above is "ugly" repetition, get over it!
+        # so, yeah, i'm bored with doing "pretty" therefore the above is "ugly" repetition, get over it!
 
         if not self.status_dialog or not self.status_dialog.IsShown():
             self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages:", APP_STATUS_MESSAGES)

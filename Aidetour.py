@@ -108,9 +108,6 @@ if __name__ == '__main__':
     setup_logger(config.APP_LOG)
     logger.info(f"Starting {config.APP_NAME}...")
 
-    aidetour_utilities.set_app_settings_location() # sets APP_SETTINGS_LOCATION
-    logger.info(f"APP_SETTINGS_LOCATION: {config.APP_SETTINGS_LOCATION}")
-
     # FIXME see AI for a command line way to allow user to edit Settings
     parser = argparse.ArgumentParser(description=f"{config.APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
     parser.add_argument('--cli', action='store_true', help=f"run {config.APP_NAME} in CLI mode (no GUI).")

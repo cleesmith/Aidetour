@@ -75,16 +75,18 @@ CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_dateti
 
 
 def run_flask_app():
-    global APP_SETTINGS_LOCATION
-    APP_SETTINGS_LOCATION = aidetour_utilities.set_app_settings_location()
     aidetour_utilities.load_settings()
     aidetour_utilities.log_settings(logger)
-
     try:
-        logger.info(f"run_flask_app: attempting to use: host={config.HOST} port={config.PORT}")
+        try:
+            logger.info(f"run_flask_app: attempting to use: host={config.HOST} port={config.PORT}")
+            port = int(config.PORT)
+        except ValueError:
+            port = 5600 # use default for wonky user entries
+            logger.info(f"run_flask_app: failed to use: {config.HOST}:{config.PORT} now using: {config.HOST}:{port} instead, to avoid int errors.")
         #******
-        # flask_app.run(host=config.HOST, port=config.PORT, debug=True)
-        serve(flask_app, host=config.HOST, port=config.PORT)
+        # flask_app.run(host=config.HOST, port=port, debug=True)
+        serve(flask_app, host=config.HOST, port=port)
         #******
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
@@ -98,6 +100,9 @@ def run_flask_app():
 
 def chat_date_time():
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
+
+
+# FIXME the following 2 def's still have issues with formatting properly:
 
 def append_chat_message(message):
     # open the log file in append mode, ensuring it creates a new file if it doesn't exist

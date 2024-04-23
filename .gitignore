@@ -21,6 +21,7 @@ Anthropic*
 anthropic*
 Log*
 Server*
+*Aidetour_Chat_log_*
 
 # PyInstaller stuff:
 build/

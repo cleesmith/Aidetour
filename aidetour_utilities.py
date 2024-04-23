@@ -124,7 +124,7 @@ def load_settings():
 def is_port_in_use(host, port):
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.settimeout(1)  # 1 seconds timeout coz all local
+            s.settimeout(1)  # 1 seconds timeout coz app'a api server is local
             result = s.connect_ex((host, int(port)))
             if result == 0:
                 logger.info(f"Port {port} on {host} is in use.")

@@ -58,7 +58,7 @@ import aidetour_utilities as config
 #       are not the same globals already set in Aidetour.py!
 
 
-MAX_TOKENS = 100
+MAX_TOKENS = 4096
 TEMPERATURE = 1
 STREAM_RESPONSE = True
 

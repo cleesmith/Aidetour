@@ -3,7 +3,7 @@ import wx
 
 class ImageViewer(wx.Frame):
     def __init__(self, parent, title):
-        super(ImageViewer, self).__init__(parent, title=title, size=(600, 600))
+        super(ImageViewer, self).__init__(parent, title=title, size=(600, 650))
         try:
             self.SetUpUI()
             self.Centre()

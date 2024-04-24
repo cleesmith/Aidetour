@@ -34,6 +34,9 @@ This combination is particularly useful for projects that require cross-platform
 as Waitress can run on various operating systems, including Windows.
 Overall, using Flask and Waitress together provides a smooth development-to-production pipeline 
 and adheres to the principle of using the best tool for each job.
+
+to check port in use or back ip use:
+python -m http.server 5600 --bind 127.0.0.1
 """
 # API Flask Anthropic related:
 import requests
@@ -74,7 +77,7 @@ current_datetime = datetime.now()
 CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
 
 
-def run_flask_app():
+def run_flask_app(cli=False):
     aidetour_utilities.load_settings()
     aidetour_utilities.log_settings(logger)
     try:
@@ -91,18 +94,26 @@ def run_flask_app():
     except OSError as e:
         if e.errno == errno.EADDRINUSE:
             logger.error(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
+            if cli:
+                print(f"Error: Address {config.HOST}:{config.PORT} is already in use.")
         elif e.errno == errno.EADDRNOTAVAIL:
             logger.error(f"Error: Can't assign requested address {config.HOST}:{config.PORT}. Check if the IP is configured on your machine.")
+            if cli:
+                print(f"Error: Can't assign requested address {config.HOST}:{config.PORT}. Check if the IP is configured on your machine.")
         else:
             logger.error(f"run_flask_app: OSError: {e}")
+            if cli:
+                print(f"run_flask_app: OSError: e:\n{e}")
     except Exception as e:
         logger.error(f"run_flask_app: Error: {config.HOST}:{config.PORT} except Exception as e:\n{e}")
+        if cli:
+            print(f"run_flask_app: Error: {config.HOST}:{config.PORT} except Exception as e:\n{e}")
 
 def chat_date_time():
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
 
 
-# FIXME the following 2 def's still have issues with formatting properly:
+# FIXME the following 2 def's still have issues with formatting response text properly:
 
 def append_chat_message(message):
     # open the log file in append mode, ensuring it creates a new file if it doesn't exist

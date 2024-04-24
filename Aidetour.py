@@ -89,9 +89,9 @@ def run_gui_version():
     app.MainLoop()
 
 def run_cli_version():
-    logger.info(f"Starting {config.APP_NAME} in CLI mode...")
-    print("run_cli_version=", config.APP_NAME, config.APP_LOGO, config.HOST, config.PORT)
-    aidetour_api_handler.run_flask_app()
+    logger.info(f"{config.APP_NAME}: CLI mode launched using settings in: {config.APP_SETTINGS_LOCATION} on: {config.HOST}:{config.PORT}")
+    print(f"{config.APP_NAME}: CLI mode launched using settings in:\n{config.APP_SETTINGS_LOCATION}\non: {config.HOST}:{config.PORT}")
+    aidetour_api_handler.run_flask_app(True)
 
 def signal_handler(sig, frame):
     print("\nKeyboard interrupt received. Shutting down...")
@@ -115,6 +115,7 @@ if __name__ == '__main__':
 
     aidetour_utilities.load_settings()
 
+    # is this needed since Anthropic yields 401 (400's) for bad key:
     # check_api_key()
 
     if args.cli:

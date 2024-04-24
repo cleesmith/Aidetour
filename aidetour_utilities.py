@@ -66,11 +66,11 @@ def set_app_settings_location():
     # else:  # Linux
     #     APP_SETTINGS_LOCATION = os.path.expanduser('~/.config')
 
-    settings_db_name = f"{APP_NAME}_Settings"
+    settings_db_name = f"{APP_NAME}_Settings.json"
     users_home = os.path.expanduser('~') # while different, this works for all
     settings_location = os.path.join(users_home, settings_db_name)
     APP_SETTINGS_LOCATION = settings_location
-    logger.info(f"set_app_settings_location(): APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    logger.info(f"set_app_settings_location: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     return APP_SETTINGS_LOCATION
 
 def create_default_settings_db():

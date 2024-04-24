@@ -20,7 +20,7 @@ from aidetour_logging import setup_logger
 
 APP_NAME = "Aidetour"
 APP_LOGO = "Aidetour.png"
-APP_SPLASH = 'aidetour_splash.py'
+APP_SPLASH = 'aidetour_splash_wx.py'
 APP_LOG = "Log_aidetour.txt"
 SERVER_LOG = "Server_log_aidetour.txt"
 RUN_SERVER = 'aidetour_run_server.py'
@@ -73,32 +73,6 @@ def set_app_settings_location():
     logger.info(f"set_app_settings_location(): APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     return APP_SETTINGS_LOCATION
 
-# def create_default_settings_db():
-#     default_settings = {
-#         'host': '127.0.0.1',
-#         'port': '5600',
-#         'api_key': 'your_api_key_here',
-#         'Claude': {
-#             'Opus': 'claude-3-opus-20240229',
-#             'Sonnet': 'claude-3-sonnet-20240229',
-#             'Haiku': 'claude-3-haiku-20240307'
-#         }
-#     }
-
-#     #   if the Shelve db does not exist, it will be created,
-#     #   and if it already exists, its contents will be discarded,
-#     #   and it will be recreated:
-#     # with shelve.open(APP_SETTINGS_LOCATION, flag='n') as settings:
-#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
-#         settings.update(default_settings)
-#         settings.close()
-
-#     # global is required to alter the existing value:
-#     global HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
-#     HOST = default_settings['host']
-#     PORT = default_settings['port']
-#     ANTHROPIC_API_KEY = default_settings['api_key']
-#     ANTHROPIC_API_MODELS = default_settings['Claude']
 def create_default_settings_db():
     default_settings = {
         'host': '127.0.0.1',
@@ -117,35 +91,13 @@ def create_default_settings_db():
     with open(APP_SETTINGS_LOCATION, 'w') as json_file:
         json.dump(default_settings, json_file, indent=4)
 
-    # update global variables from the default settings
+    # update global variables from the default settings:
     global HOST, PORT, ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS
     HOST = default_settings['host']
     PORT = default_settings['port']
     ANTHROPIC_API_KEY = default_settings['api_key']
     ANTHROPIC_API_MODELS = default_settings['Claude']
 
-
-# def load_settings():
-#     # required to assign a new value to any global value:
-#     global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
-
-#     set_app_settings_location() # sets APP_SETTINGS_LOCATION
-
-#     # this "check by double open db settings" works but seems dorky
-#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
-#         if settings.get('host'):
-#             pass
-#         else:
-#             # settings db never existed or whatever, so recreate it:
-#             create_default_settings_db()
-#         settings.close()
-
-#     with shelve.open(APP_SETTINGS_LOCATION) as settings:
-#         ANTHROPIC_API_KEY = settings.get('api_key')
-#         ANTHROPIC_API_MODELS = settings.get('Claude', {})
-#         HOST = settings.get('host')
-#         PORT = settings.get('port')
-#         settings.close()
 def load_settings():
     # required to assign a new value to any global value:
     global ANTHROPIC_API_KEY, ANTHROPIC_API_MODELS, HOST, PORT
@@ -221,13 +173,13 @@ def show_simple_message(title, message):
 def executable_dir():
     # get the directory where the executable resides:
     if getattr(sys, 'frozen', False):
-        # If the application is run as a PyInstaller bundle
+        # if the application is run as a PyInstaller bundle
         executable_dir = os.path.dirname(sys.executable)
     else:
-        # Otherwise, just use the current working directory
+        # otherwise, just use the current working directory
         executable_dir = os.path.dirname(os.path.realpath(__file__))
 
-    logger.info(f">>>>>>>> executable_dir={executable_dir}")
+    logger.info(f"aidetour_utilities: executable_dir={executable_dir}")
     return executable_dir
 
 def resource_path(relative_path):
@@ -250,13 +202,6 @@ def load_models_data():
         "data": [],
         "object": "list"
     }
-
-    # as of April 2024:
-    # ANTHROPIC_API_MODELS = {
-    #     'Opus': 'claude-3-opus-20240229', 
-    #     'Sonnet': 'claude-3-sonnet-20240229', 
-    #     'Haiku': 'claude-3-haiku-20240307'
-    # }
 
     # iterate through the models in ANTHROPIC_API_MODELS
     for model_name, model_id in ANTHROPIC_API_MODELS.items():

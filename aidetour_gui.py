@@ -167,13 +167,6 @@ class SettingsDialog(wx.Dialog):
         self.host.SetValue(config.HOST)
         self.port.SetValue(config.PORT)
 
-    # def OnSave(self, event):
-    #     settings = shelve.open(config.APP_SETTINGS_LOCATION)
-    #     settings['api_key'] = self.api_key.GetValue()
-    #     settings['host'] = self.host.GetValue()
-    #     settings['port'] = self.port.GetValue()
-    #     settings.close()
-    #     self.Destroy()
     def OnSave(self, event):
         settings_filename = config.APP_SETTINGS_LOCATION
         try:
@@ -194,17 +187,6 @@ class SettingsDialog(wx.Dialog):
 
         self.Destroy()
     
-    # def OnRestart(self, event):
-    #     global SERVER_PROCESS
-    #     settings = shelve.open(config.APP_SETTINGS_LOCATION)
-    #     settings['api_key'] = self.api_key.GetValue()
-    #     settings['host'] = self.host.GetValue()
-    #     settings['port'] = self.port.GetValue()
-    #     settings.close()
-    #     stop_server()
-    #     aidetour_utilities.load_settings()
-    #     start_server()
-    #     self.Destroy()
     def OnRestart(self, event):
         global SERVER_PROCESS
         settings_filename = config.APP_SETTINGS_LOCATION
@@ -242,7 +224,6 @@ class LogsDialog(wx.Dialog):
         
         self.log_text = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
         # font = wx.Font(16, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
-        # font = wx.Font(16, wx.FONTFAMILY_TELETYPE, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
         self.log_text.SetFont(font)
         vbox.Add(self.log_text, 1, wx.EXPAND | wx.ALL, 10)
@@ -428,7 +409,7 @@ class MenuStuff(TaskBarIcon):
                 SERVER_PROCESS = None
             response = requests.get(url, timeout=1)
         except Exception as e:
-            # look, the user wants out, exit/quit/whatever, so let them free
+            # ok, the user wants out, exit/quit/whatever, so let them be free
             pass
 
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
@@ -460,3 +441,4 @@ class GuiStuff(wx.App):
         self.SetTopWindow(frame)
         MenuStuff(frame)
         return True
+

@@ -63,25 +63,6 @@ import aidetour_utilities
 import aidetour_utilities as config 
 
 
-def check_api_key():
-    # check if the API key is missing or empty
-    if config.ANTHROPIC_API_KEY is None or config.ANTHROPIC_API_KEY.strip() == '':
-        error_message = "ERROR\n\n"
-        error_message += "The ANTHROPIC_API_KEY is missing or empty!"
-        error_message += "More details are provided in the README file for this app."
-        logger.error(error_message)
-        aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
-        # sys.exit(1) 
-
-    # check if the API key is the placeholder value
-    if config.ANTHROPIC_API_KEY == 'your_api_key_here':
-        error_message = "ERROR\n\n"
-        error_message += "Please replace the 'your_api_key_here' with your Anthropic API key, then run this app again.\n\n"
-        error_message += "More details are provided in the README file for this app."
-        logger.error(error_message)
-        aidetour_utilities.show_custom_message(config.APP_NAME, error_message)
-        # sys.exit(1) 
-
 def run_gui_version():
     aidetour_utilities.set_app_mode('gui')
     import aidetour_gui
@@ -119,9 +100,6 @@ if __name__ == '__main__':
 
     aidetour_utilities.load_settings()
     APP_MODE = "gui" # default
-
-    # is this needed since Anthropic yields 401 (400's) for bad keys:
-    # check_api_key()
 
     if args.cli:
         run_cli_version()

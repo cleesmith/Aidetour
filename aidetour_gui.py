@@ -29,6 +29,7 @@ SERVER_PROCESS = None
 def start_server():
     global SERVER_PROCESS
     logger.info(f"{config.HOST} {config.PORT} type(config.PORT)={type(config.PORT)} {config.RUN_SERVER}")
+    aidetour_utilities.log_app_settings(logger)
     # ************   ****************
     SERVER_PROCESS = subprocess.Popen(['python', 
         config.RUN_SERVER,
@@ -239,13 +240,25 @@ class LogsDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
     
     def load_logs(self):
-        try:
-            with open(config.APP_LOG, "r") as file:
-                logs = file.read()
-                self.log_text.SetValue(logs)
-        except FileNotFoundError:
-            self.log_text.SetValue(f"{config.APP_LOG} file not found.")
-    
+        # try:
+        #     with open(config.APP_LOG, "r") as file:
+        #         logs = file.read()
+        #         self.log_text.SetValue(logs)
+        # except FileNotFoundError:
+        #     self.log_text.SetValue(f"{config.APP_LOG} file not found.")
+        if config.CHAT_LOG is None or not isinstance(config.CHAT_LOG, (str, bytes, os.PathLike)):
+            # self.log_text.SetValue("Log file path is not set or invalid.")
+            self.log_text.SetValue(f"No chat activity found in: {config.CHAT_LOG}")
+        else:
+            try:
+                with open(config.CHAT_LOG, "r") as file:
+                    logs = file.read()
+                    self.log_text.SetValue(logs)
+            except FileNotFoundError:
+                self.log_text.SetValue(f"{config.CHAT_LOG} file not found.")
+            except Exception as e:
+                self.log_text.SetValue(f"Error loading log file: {str(e)}")
+
     def OnClose(self, event):
         self.Destroy()
     

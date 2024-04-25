@@ -1,22 +1,29 @@
 # aidetour_utilities.py
 
 import os
-import shelve
 import socket
 import sys
 import platform
+import time
+from datetime import datetime, timezone
 import re
 import json
 import textwrap
 import configparser
 import subprocess
-import tkinter as tk
-from tkinter import messagebox
 from loguru import logger
 
 # Aidetour modules:
 import aidetour_logging
 from aidetour_logging import setup_logger
+
+
+def set_chat_log():
+    # global CHAT_LOG
+    # milliseconds since the Unix Epoch
+    timestamp_milliseconds = int(time.time() * 1000)
+    current_datetime = datetime.now()
+    CHAT_LOG = f"{timestamp_milliseconds}_{APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
 
 APP_NAME = "Aidetour"
 APP_MODE = "gui" # or "cli"
@@ -24,6 +31,7 @@ APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash_wx.py'
 APP_LOG = "Log_aidetour.txt"
 SERVER_LOG = "Server_log_aidetour.txt"
+CHAT_LOG = set_chat_log()
 RUN_SERVER = 'aidetour_run_server.py'
 APP_SETTINGS_LOCATION = None
 HOST = None
@@ -47,16 +55,18 @@ def set_port_usable(port):
 
 def log_app_settings(logger):
     logger.info(f"APP_NAME: {APP_NAME}")
+    logger.info(f"APP_MODE: {APP_MODE}")
     logger.info(f"APP_LOGO: {APP_LOGO}")
     logger.info(f"APP_SPLASH: {APP_SPLASH}")
-    logger.info(f"APP_LOG: {APP_LOG}")
     logger.info(f"APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    logger.info(f"APP_LOG: {APP_LOG}")
     logger.info(f"SERVER_LOG: {SERVER_LOG}")
+    logger.info(f"CHAT_LOG: {CHAT_LOG}")
     logger.info(f"RUN_SERVER: {RUN_SERVER}")
     logger.info(f"HOST: {HOST}")
     logger.info(f"PORT: {PORT}")
     # don't show user's api key in log files:
-    logger.info(f"ANTHROPIC_API_KEY: REDACTED!")
+    logger.info(f"ANTHROPIC_API_KEY: [redacted]")
     logger.info(f"ANTHROPIC_API_MODELS: {ANTHROPIC_API_MODELS}")
     logger.info(f"ANTHROPIC_MESSAGES_API_URL: {ANTHROPIC_MESSAGES_API_URL}")
     logger.info(f"DEFAULT_MODEL: {DEFAULT_MODEL}")
@@ -150,30 +160,6 @@ def show_splash_screen():
 OpenAI API  <----> Anthropic API\n\n
 '''
     subprocess.Popen(['python', APP_SPLASH, APP_LOGO, welcome_message])
-
-def show_custom_message(title, message):
-    # Create a root window
-    root = tk.Tk()
-    root.title(title)
-
-    # Set window size and position
-    root.geometry('400x300+300+300')  # Width x Height + X_offset + Y_offset
-
-    # Create a label for the message, with text left-justified
-    message_label = tk.Label(root, text=message, justify=tk.LEFT, wraplength=350)
-    message_label.pack(pady=20, padx=20, anchor='w')  # anchor 'w' aligns the label itself to the left
-
-    # Create an OK button to close the dialog
-    ok_button = tk.Button(root, text='OK', command=root.destroy)
-    ok_button.pack(pady=20)
-
-    root.mainloop()
-
-def show_simple_message(title, message):
-    root = tk.Tk()
-    root.withdraw()  # Hide the root window
-    messagebox.showinfo(title, message)
-    root.destroy()
 
 def executable_dir():
     # get the directory where the executable resides:

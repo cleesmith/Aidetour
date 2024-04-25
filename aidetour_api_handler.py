@@ -72,21 +72,18 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 # flask_app.logger.setLevel(logging.DEBUG)
 # logging.getLogger('flask_cors').level = logging.DEBUG
 
-# milliseconds since the Unix Epoch
-timestamp_milliseconds = int(time.time() * 1000)
-current_datetime = datetime.now()
-CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
-
 
 def run_flask_app(cli=False):
     aidetour_utilities.load_settings()
 
-    # when in terminal/cmd use SERVER_LOG instead of APP_LOG:
-    if config.APP_MODE == "cli":
-        print(f"APP_NAME: {config.APP_NAME} APP_MODE: {config.APP_MODE}\nmore details in SERVER_LOG: {config.SERVER_LOG}")
-        setup_logger(config.SERVER_LOG)
+    aidetour_utilities.set_chat_log()
 
     aidetour_utilities.log_app_settings(logger)
+
+    # when in terminal/cmd use SERVER_LOG instead of APP_LOG:
+    if config.APP_MODE == "cli":
+        print(f"APP_NAME: {config.APP_NAME} APP_MODE: {config.APP_MODE}\nmore details/errors in server log: {config.SERVER_LOG}\nchat logged in: {config.CHAT_LOG}\n")
+        setup_logger(config.SERVER_LOG)
 
     try:
         try:
@@ -118,6 +115,7 @@ def run_flask_app(cli=False):
             print(f"run_flask_app: Error: {config.HOST}:{config.PORT} except Exception as e:\n{e}")
 
 def chat_date_time():
+    current_datetime = datetime.now()
     return f"[{current_datetime.strftime('%Y/%m/%d')} {current_datetime.strftime('%H:%M:%S')}]"
 
 
@@ -125,7 +123,7 @@ def chat_date_time():
 
 def append_chat_message(message):
     # open the log file in append mode, ensuring it creates a new file if it doesn't exist
-    with open(CHAT_LOG, "a") as file:
+    with open(config.CHAT_LOG, "a") as file:
         file.write(f"{message}\n")
 
 def extract_content_as_text(oai_data):
@@ -457,14 +455,18 @@ def chat_completions(oai_data):
             # end -> for line in claude_response.iter_lines():
 
             try:
-                # Now, all streamed (SSE) lines from Claude, really pieces of words, 
-                # have been received and converted to openai api responses and yielded, 
-                # let's log the full response in a more chat-like style in chat log text file.
+                # Now, all streamed (SSE) lines from Anthropic's API are done, and 
+                # have been received and converted to OpenAPI API responses and yielded, so 
+                # let's log the full response in a more chat-like style in the chat log file.
                 # 
+                # FIXME cls: is this where text formatting weirdness happens?
                 # join all pieces of text into one large string
                 full_response_string = ''.join(full_response)
+
                 # remove most of the Markdown, but keep hyperlinks
                 clean_text = aidetour_utilities.remove_markdown(full_response_string)
+
+                # FIXME cls: is this where text formatting weirdness happens?
                 # wrap text at 70 characters per line so it's easier to read for users
                 final_text = aidetour_utilities.wrap_text(clean_text)
                 append_chat_message(f"{final_text}\n")

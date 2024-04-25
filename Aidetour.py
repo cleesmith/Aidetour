@@ -83,14 +83,17 @@ def check_api_key():
         # sys.exit(1) 
 
 def run_gui_version():
+    aidetour_utilities.set_app_mode('gui')
     import aidetour_gui
     logger.info("GUI launched...")
     app = aidetour_gui.GuiStuff(False)
     app.MainLoop()
 
 def run_cli_version():
-    logger.info(f"{config.APP_NAME}: CLI mode launched using settings in: {config.APP_SETTINGS_LOCATION} on: {config.HOST}:{config.PORT}")
-    print(f"{config.APP_NAME}: CLI mode launched using settings in:\n{config.APP_SETTINGS_LOCATION}\non: {config.HOST}:{config.PORT}")
+    # for app usage in terminal (Mac/Linux) or cmd (Windows):
+    aidetour_utilities.set_app_mode('cli')
+    logger.info(f"{config.APP_NAME}: CLI mode launched using settings in: {config.APP_SETTINGS_LOCATION}to run API server on: http://{config.HOST}:{config.PORT}")
+    print(f"{config.APP_NAME}: CLI mode launched using settings in:\n{config.APP_SETTINGS_LOCATION}\nto run API server on: http://{config.HOST}:{config.PORT}")
     aidetour_api_handler.run_flask_app(True)
 
 def signal_handler(sig, frame):
@@ -108,14 +111,16 @@ if __name__ == '__main__':
     setup_logger(config.APP_LOG)
     logger.info(f"Starting {config.APP_NAME}...")
 
-    # FIXME see AI for a command line way to allow user to edit Settings
+    # FIXME 
+    #   ask AI for a command line way to allow user to edit Settings
     parser = argparse.ArgumentParser(description=f"{config.APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
     parser.add_argument('--cli', action='store_true', help=f"run {config.APP_NAME} in CLI mode (no GUI).")
     args = parser.parse_args()
 
     aidetour_utilities.load_settings()
+    APP_MODE = "gui" # default
 
-    # is this needed since Anthropic yields 401 (400's) for bad key:
+    # is this needed since Anthropic yields 401 (400's) for bad keys:
     # check_api_key()
 
     if args.cli:

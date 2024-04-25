@@ -48,6 +48,7 @@ import anthropic
 
 # Aidetour modules:
 import aidetour_logging
+from aidetour_logging import setup_logger
 import aidetour_utilities
 # an alias to 'config.' instead of 'aidetour_utilities.'
 import aidetour_utilities as config
@@ -79,7 +80,14 @@ CHAT_LOG = f"{timestamp_milliseconds}_{config.APP_NAME}_Chat_log_{current_dateti
 
 def run_flask_app(cli=False):
     aidetour_utilities.load_settings()
-    aidetour_utilities.log_settings(logger)
+
+    # when in terminal/cmd use SERVER_LOG instead of APP_LOG:
+    if config.APP_MODE == "cli":
+        print(f"APP_NAME: {config.APP_NAME} APP_MODE: {config.APP_MODE}\nmore details in SERVER_LOG: {config.SERVER_LOG}")
+        setup_logger(config.SERVER_LOG)
+
+    aidetour_utilities.log_app_settings(logger)
+
     try:
         try:
             logger.info(f"run_flask_app: attempting to use: host={config.HOST} port={config.PORT}")
@@ -170,28 +178,28 @@ def get_openai_request_data(openai_request):
 # def cause_exception():
 #     raise Exception("*** exception raised by: /cause_exception ***")
 
-# Error handler for HTTP exceptions
-@flask_app.errorhandler(HTTPException)
-def handle_http_exception(e):
-    response = e.get_response()
-    # Log the error using the configured logger
-    logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
-    response.data = jsonify({
-        "type": e.name,
-        "message": e.description,
-    }).data
-    response.content_type = "application/json"
-    return response
+# # Error handler for HTTP exceptions
+# @flask_app.errorhandler(HTTPException)
+# def handle_http_exception(e):
+#     response = e.get_response()
+#     # Log the error using the configured logger
+#     logger.error(f"HTTPException handled by handle_http_exception: {e.description}", exc_info=True)
+#     response.data = jsonify({
+#         "type": e.name,
+#         "message": e.description,
+#     }).data
+#     response.content_type = "application/json"
+#     return response
 
-# Error handler for non-HTTP exceptions (catch-all)
-@flask_app.errorhandler(Exception)
-def handle_exception(e):
-    # Log the error using the configured logger
-    logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
-    return jsonify({
-        "type": "InternalServerError",
-        "message": "An unexpected error has occurred.",
-    }), 500
+# # Error handler for non-HTTP exceptions (catch-all)
+# @flask_app.errorhandler(Exception)
+# def handle_exception(e):
+#     # Log the error using the configured logger
+#     logger.error(f"Exception handled by handle_exception: {e}", exc_info=True)
+#     return jsonify({
+#         "type": "InternalServerError",
+#         "message": "An unexpected error has occurred.",
+#     }), 500
 
 # curl -X GET http://localhost:5600/v1/ping
 @flask_app.route('/v1/ping', methods=['GET'])
@@ -242,15 +250,33 @@ def chat_completions_options():
     # return response
     return '', 200
 
+def validate_json(f):
+    """Decorator to validate JSON payload and ensure the correct Content-Type."""
+    def validate_json_payload(*args, **kwargs):
+        # check if the Content-Type is application/json
+        if not request.is_json:
+            logger.error("Invalid Content-Type: {method}", method=request.method)
+            return jsonify({'error': 'Requests must be JSON, with the Content-Type header set to application/json'}), 400
+        
+        # attempt to parse the JSON data
+        json_data = request.get_json()
+        if json_data is None:
+            logger.error("Empty JSON payload: {method}", method=request.method)
+            return jsonify({'error': 'JSON payload cannot be empty'}), 400
+
+        return f(*args, **kwargs, oai_data=json_data)
+    return validate_json_payload
+
 @flask_app.route('/v1/chat/completions', methods=['POST'])
-def chat_completions():
+@validate_json
+def chat_completions(oai_data):
     start_time = time.perf_counter()
     logger.info("\n\nIncoming OpenAI API POST request to: '/v1/chat/completions'")
 
-    oai_data = request.get_json()
-    if oai_data is None:
-        logger.info("\n400: error: Invalid JSON payload")
-        return jsonify({'error': 'Invalid JSON payload'}), 400
+    # oai_data = request.get_json()
+    # if oai_data is None:
+    #     logger.info("\n400: error: Invalid JSON payload")
+    #     return jsonify({'error': 'Invalid JSON payload'}), 400
     logger.info(f"oai_data: {oai_data}")
 
     append_chat_message(f"___\nMe:  {chat_date_time()}\n")

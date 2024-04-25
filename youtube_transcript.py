@@ -12,10 +12,12 @@ from langchain_community.document_loaders import YoutubeLoader
 # 	"https://www.youtube.com/live/Seu8KkqBY1k?si=cGrmdVArmk82UDOC",
 #   "https://www.youtube.com/live/oCq5QCbsdQ8?si=SrsfqE5Y31uE3x-o",
 # 	"https://www.youtube.com/live/-oPYGeAdgFI?si=_zj1PNkbjSExICQQ",
+	# "https://youtu.be/OaxUPuv1uOE?si=Nu43K6yKyh__rOtl",
+
 
 
 loader = YoutubeLoader.from_youtube_url(
-	"https://youtu.be/OaxUPuv1uOE?si=Nu43K6yKyh__rOtl",
+	"https://www.youtube.com/live/h5fjiNeRyIw?si=TUrUuuyfsKLuwdmP",
 	add_video_info=True,
 	language=["en", "es"],
 	translation="en",

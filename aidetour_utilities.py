@@ -19,6 +19,7 @@ import aidetour_logging
 from aidetour_logging import setup_logger
 
 APP_NAME = "Aidetour"
+APP_MODE = "gui" # or "cli"
 APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash_wx.py'
 APP_LOG = "Log_aidetour.txt"
@@ -33,6 +34,10 @@ DEFAULT_MODEL = "claude-3-haiku-20240307"
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 
 
+def set_app_mode(mode):
+    global APP_MODE
+    APP_MODE = mode
+
 def set_port_usable(port):
     try:
         port = int(port)
@@ -40,7 +45,7 @@ def set_port_usable(port):
         port = 5600 # use default for wonky user entries
     return port
 
-def log_settings(logger):
+def log_app_settings(logger):
     logger.info(f"APP_NAME: {APP_NAME}")
     logger.info(f"APP_LOGO: {APP_LOGO}")
     logger.info(f"APP_SPLASH: {APP_SPLASH}")

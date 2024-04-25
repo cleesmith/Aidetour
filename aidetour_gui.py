@@ -157,7 +157,7 @@ class SettingsDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self.OnRestart, restartButton)
         self.Bind(wx.EVT_BUTTON, self.OnClose, closeButton)
 
-        # load most recent Settings for this dialog box:
+        # load Settings for this dialog box:
         aidetour_utilities.load_settings()
 
         self.api_key.SetValue(config.ANTHROPIC_API_KEY)
@@ -271,13 +271,13 @@ class YouTubeDialog(wx.Dialog):
         self.btn_done = wx.Button(self.panel, label="Done")
         self.btn_done.Bind(wx.EVT_BUTTON, self.on_done_click)
 
-        # Layout for buttons using a horizontal box sizer
+        # layout for buttons using a horizontal box sizer
         self.button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.button_sizer.Add(self.btn_youtube, 0, wx.ALL, 5)
         self.button_sizer.AddSpacer(60)
         self.button_sizer.Add(self.btn_done, 0, wx.ALL, 5)
 
-        # Main sizer for the dialog, including the webview and the button sizer
+        # main sizer for the dialog, including the webview and the button sizer
         self.main_sizer = wx.BoxSizer(wx.VERTICAL)
         self.main_sizer.Add(self.webview, 1, wx.EXPAND | wx.ALL, 5)
         self.main_sizer.Add(self.button_sizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
@@ -303,15 +303,17 @@ class MenuStuff(TaskBarIcon):
         APP_STATUS_MESSAGES = ""
         SERVER_PROCESS = None
 
-        # FIXME !!!!!!!!!!!!!
-        # self.app_warning()
+        # to check port in use or back ip use:
+        #   python -m http.server 5600 --bind 127.0.0.1
+        # mac check listening:
+        #   lsof -iTCP -sTCP:LISTEN -P -n
 
         if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
             self.app_warning()
         else:
             # this sets SERVER_PROCESS, so it can be terminated if needed:
             start_server()
-            logger.info(f"MenuStuff: *** SERVER_PROCESS={SERVER_PROCESS}")
+            logger.info(f"MenuStuff: start_server(): SERVER_PROCESS={SERVER_PROCESS}")
 
         # FIXME !!!!!!!!!!!!!
         # SERVER_PROCESS = None
@@ -351,13 +353,13 @@ class MenuStuff(TaskBarIcon):
             response = requests.get(url, timeout=1)
             logger.info(f"Ping status code: {response.status_code}")
             if response.status_code == 200:
-                APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}. The server is \"5 by 5\" and \"go at throttle up\"!"
+                APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}. The server is \"go at throttle up\"!"
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
             else:
                 APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
                 APP_STATUS_MESSAGES += f"Pinging "
-                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}. \"The mains are offline\"!"
+                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}. \"Oh no, the mains are offline\"!"
                 APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
@@ -377,7 +379,8 @@ class MenuStuff(TaskBarIcon):
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
 
-        # so, yeah, i'm bored with doing "pretty" therefore the above is "ugly" repetition, get over it!
+        # so, yeah, i'm bored with doing "pretty" pythonista zen code, 
+        # therefore the above "except"s are ugly" repetition, get over it!
 
         if not self.status_dialog or not self.status_dialog.IsShown():
             self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages:", APP_STATUS_MESSAGES)

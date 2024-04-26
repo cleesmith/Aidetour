@@ -89,7 +89,10 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     from aidetour_logging import setup_logger
-    setup_logger(config.APP_LOG)
+    # users_home = os.path.expanduser('~') # while different, this works for all platforms
+    # app_log = os.path.join(users_home, config.APP_LOG)
+    app_log = aidetour_utilities.prepend_home_dir(config.APP_LOG)
+    setup_logger(app_log)
     logger.info(f"Starting {config.APP_NAME}...")
 
     # FIXME 

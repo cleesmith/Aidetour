@@ -83,7 +83,8 @@ def run_flask_app(cli=False):
     # when in terminal/cmd use SERVER_LOG instead of APP_LOG:
     if config.APP_MODE == "cli":
         print(f"APP_NAME: {config.APP_NAME} APP_MODE: {config.APP_MODE}\nmore details/errors in server log: {config.SERVER_LOG}\nchat logged in: {config.CHAT_LOG}\n")
-        setup_logger(config.SERVER_LOG)
+        server_log = aidetour_utilities.prepend_home_dir(config.SERVER_LOG)
+        setup_logger(server_log)
 
     try:
         try:
@@ -257,7 +258,7 @@ def chat_completions_options():
     return '', 200
 
 def validate_json(f):
-    """Decorator to validate JSON payload and ensure the correct Content-Type."""
+    # decorator to validate JSON payload and ensure the correct Content-Type.
     def validate_json_payload(*args, **kwargs):
         # check if the Content-Type is application/json
         if not request.is_json:
@@ -279,13 +280,9 @@ def chat_completions(oai_data):
     start_time = time.perf_counter()
     logger.info("\n\nIncoming OpenAI API POST request to: '/v1/chat/completions'")
 
-    # oai_data = request.get_json()
-    # if oai_data is None:
-    #     logger.info("\n400: error: Invalid JSON payload")
-    #     return jsonify({'error': 'Invalid JSON payload'}), 400
     logger.info(f"oai_data: {oai_data}")
 
-    append_chat_message(f"___\nMe:  {chat_date_time()}\n")
+    append_chat_message(f"\n{'_'*26}\nMe:  {chat_date_time()}\n{'_'*26}\n")
     extract_content_as_text(oai_data)
 
     claude_data = get_openai_request_data(oai_data)
@@ -309,7 +306,7 @@ def chat_completions(oai_data):
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
     logger.info(f">>> Anthropic's response: {claude_response}")
 
-    append_chat_message(f"\n___\nAI: {claude_model}:  {chat_date_time()}\n")
+    append_chat_message(f"\n{'_'*26}\nAI: {claude_model}:  {chat_date_time()}\n{'_'*26}\n")
 
     if claude_response.status_code != 200:
         try:

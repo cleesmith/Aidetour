@@ -35,18 +35,20 @@ DEFAULT_MODEL = "claude-3-haiku-20240307"
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 
 
+def prepend_home_dir(filename):
+    users_home = os.path.expanduser('~') # while different, this works for all
+    return os.path.join(users_home, filename)
+
 def set_chat_log():
     global CHAT_LOG
     # milliseconds since the Unix Epoch
     timestamp_milliseconds = int(time.time() * 1000)
     current_datetime = datetime.now()
     chat_log_name = f"{timestamp_milliseconds}_{APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
-    users_home = os.path.expanduser('~') # while different, this works for all platforms
+    # users_home = os.path.expanduser('~') # while different, this works for all platforms
     # CHAT_LOG = os.path.join(users_home, chat_log_name)
-    # FIXME this is not proper
-    CHAT_LOG = os.path.join(users_home, 'Aidetour', chat_log_name)
+    CHAT_LOG = prepend_home_dir(chat_log_name)
     logger.info(f"aidetour_utilities: set_chat_log(): CHAT_LOG={CHAT_LOG}")
-    # ensure the chat log file exists and add a header line if it's newly created
     if not os.path.exists(CHAT_LOG):
         with open(CHAT_LOG, 'a+') as file:
             file.write(f"Chat Log created at {current_datetime.strftime('%Y-%m-%d %H:%M:%S')} and named:\n{CHAT_LOG}\n{'_' * 70}")
@@ -60,7 +62,7 @@ def set_port_usable(port):
     try:
         port = int(port)
     except ValueError:
-        port = 5600 # use default for wonky user entries
+        port = 5600 # just use a default for wonky user entries
     return port
 
 def log_app_settings(logger):
@@ -92,8 +94,9 @@ def set_app_settings_location():
     #     APP_SETTINGS_LOCATION = os.path.expanduser('~/.config')
 
     settings_db_name = f"{APP_NAME}_Settings.json"
-    users_home = os.path.expanduser('~') # while different, this works for all
-    settings_location = os.path.join(users_home, settings_db_name)
+    # users_home = os.path.expanduser('~') # while different, this works for all
+    # settings_location = os.path.join(users_home, settings_db_name)
+    settings_location = prepend_home_dir(settings_db_name)
     APP_SETTINGS_LOCATION = settings_location
     logger.info(f"set_app_settings_location: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     return APP_SETTINGS_LOCATION

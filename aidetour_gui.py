@@ -218,7 +218,7 @@ class SettingsDialog(wx.Dialog):
 
 class LogsDialog(wx.Dialog):
     def __init__(self, parent, title):
-        super(LogsDialog, self).__init__(parent, title=title, size=(600, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        super(LogsDialog, self).__init__(parent, title=title, size=(720, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -240,23 +240,31 @@ class LogsDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
     
     def load_logs(self):
-        # try:
-        #     with open(config.APP_LOG, "r") as file:
-        #         logs = file.read()
-        #         self.log_text.SetValue(logs)
-        # except FileNotFoundError:
-        #     self.log_text.SetValue(f"{config.APP_LOG} file not found.")
-        if config.CHAT_LOG is None or not isinstance(config.CHAT_LOG, (str, bytes, os.PathLike)):
-            # self.log_text.SetValue("Log file path is not set or invalid.")
-            self.log_text.SetValue(f"No chat activity found in: {config.CHAT_LOG}")
+        # we need to get the name of the CHAT_LOG file via an api call:
+        try:
+            response = requests.get(f"http://{config.HOST}:{config.PORT}/v1/chat_log")
+            response.raise_for_status()  # raise an exception for 4xx or 5xx status codes
+            chat_data = response.json()
+            chat_log = chat_data['chat_log']
+            logger.info(f"load_logs(self): chat_log={chat_log}")
+        except requests.exceptions.RequestException as e:
+            logger.info(f"load_logs(self): Error occurred while making the API request: {e}")
+        except (KeyError, TypeError, ValueError) as e:
+            logger.info(f"load_logs(self): Error occurred while parsing the API response: {e}")
+
+        if chat_log is None or not isinstance(chat_log, (str, bytes, os.PathLike)):
+            logger.info(f"load_logs(self): No chat activity found in: {chat_log}")
+            self.log_text.SetValue(f"No chat activity found in: {chat_log}")
         else:
             try:
-                with open(config.CHAT_LOG, "r") as file:
+                with open(chat_log, "r") as file:
                     logs = file.read()
                     self.log_text.SetValue(logs)
             except FileNotFoundError:
-                self.log_text.SetValue(f"{config.CHAT_LOG} file not found.")
+                logger.info(f"load_logs(self): except FileNotFoundError")
+                self.log_text.SetValue(f"{chat_log} file not found.")
             except Exception as e:
+                logger.info(f"load_logs(self): except Exception as e:\n{str(e)}")
                 self.log_text.SetValue(f"Error loading log file: {str(e)}")
 
     def OnClose(self, event):
@@ -352,8 +360,8 @@ class MenuStuff(TaskBarIcon):
         menu = wx.Menu()
         menu.Append(1, 'Status')
         menu.Append(2, 'Settings')
-        menu.Append(3, 'Log')
-        menu.Append(4, 'Video')
+        menu.Append(3, 'Chat log')
+        menu.Append(4, 'About')
         menu.Append(5, 'Exit')
         return menu
 
@@ -396,24 +404,28 @@ class MenuStuff(TaskBarIcon):
         # therefore the above "except"s are ugly" repetition, get over it!
 
         if not self.status_dialog or not self.status_dialog.IsShown():
-            self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages:", APP_STATUS_MESSAGES)
+            self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages", APP_STATUS_MESSAGES)
             self.status_dialog.Show()
+            self.status_dialog.Raise() # give it the focus
 
     def OnSettings(self, event):
         if not self.settings_dialog or not self.settings_dialog.IsShown():
             self.settings_dialog = SettingsDialog(None, f"{config.APP_NAME} Settings")
             self.settings_dialog.Show()
+            self.settings_dialog.Raise() # give it the focus
 
     def OnLogs(self, event):
         if not self.logs_dialog or not self.logs_dialog.IsShown():
-            self.logs_dialog = LogsDialog(None, f"{config.APP_NAME} Log")
+            self.logs_dialog = LogsDialog(None, f"{config.APP_NAME} Chat Log")
             self.logs_dialog.Show()
+            self.logs_dialog.Raise() # give it the focus
 
     def OnVideo(self, event):
         if not self.video_dialog or not self.video_dialog.IsShown():
             video_id = "J7tab9JwbaI?si=sbmaZr6eeLGGjfq_"
             self.video_dialog = YouTubeDialog(None, video_id)
             self.video_dialog.Show()
+            self.video_dialog.Raise() # give it the focus
 
     def OnExit(self, event=None):
         url = f"http://{config.HOST}:{config.PORT}/v1/shutdown"

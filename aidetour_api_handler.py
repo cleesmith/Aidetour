@@ -123,6 +123,7 @@ def chat_date_time():
 
 def append_chat_message(message):
     # open the log file in append mode, ensuring it creates a new file if it doesn't exist
+    logger.info(f"aidetour_api_handler: append_chat_message(message): config.CHAT_LOG={config.CHAT_LOG}")
     with open(config.CHAT_LOG, "a") as file:
         file.write(f"{message}\n")
 
@@ -176,6 +177,7 @@ def get_openai_request_data(openai_request):
 # def cause_exception():
 #     raise Exception("*** exception raised by: /cause_exception ***")
 
+# FIXME both of these errorhandler's may hide the actual error!
 # # Error handler for HTTP exceptions
 # @flask_app.errorhandler(HTTPException)
 # def handle_http_exception(e):
@@ -198,6 +200,12 @@ def get_openai_request_data(openai_request):
 #         "type": "InternalServerError",
 #         "message": "An unexpected error has occurred.",
 #     }), 500
+
+# curl -X GET http://localhost:5600/v1/chat_log
+@flask_app.route('/v1/chat_log', methods=['GET'])
+def get_chat_log():
+    logger.info(f"Received request for CHAT_LOG: {config.CHAT_LOG}")
+    return jsonify({'chat_log': config.CHAT_LOG})
 
 # curl -X GET http://localhost:5600/v1/ping
 @flask_app.route('/v1/ping', methods=['GET'])

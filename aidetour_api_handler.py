@@ -300,56 +300,13 @@ def chat_completions(oai_data):
     keys_of_interest = ["anthropic-version", "anthropic-beta"]
     headers_to_print = ", ".join(f"{key}: {headers[key]}" for key in keys_of_interest if key in headers)
 
-# import json
-# from http.client import HTTPSConnection
-
-# # Assuming config.ANTHROPIC_MESSAGES_API_URL is parsed to extract host and path
-# host = "api.anthropic.com"  # Replace with actual host extracted from URL
-# port = 443  # Standard port for HTTPS
-# path = "/v1/messages"  # Replace with actual path extracted from URL
-
-# # Setup headers and data as before
-# headers = {
-#     "anthropic-version": "2023-06-01",
-#     "anthropic-beta": "messages-2023-12-15",
-#     "content-type": "application/json",
-#     "x-api-key": "your_api_key_here"  # Use your actual API key
-# }
-
-# claude_data = {
-#     "model": "claude-3-opus-20240229",
-#     "messages": [{"role": "user", "content": "Hello"}],
-#     "max_tokens": 256,
-#     "stream": True
-# }
-
-# print("Starting connection...")
-# try:
-#     conn = HTTPSConnection(host, port)
-#     conn.request("POST", path, body=json.dumps(claude_data), headers=headers)
-#     response = conn.getresponse()
-
-#     if response.status == 200:
-#         print("Streaming response:")
-#         # Handle streaming if necessary, assuming response is chunked
-#         for line in response:
-#             print(line.decode().strip())
-#     else:
-#         # Error handling similar to requests' .json() method
-#         error_body = response.read().decode()  # Read the complete response body
-#         error_info = json.loads(error_body)  # Convert from JSON to a Python dictionary
-#         print(f"Error: {error_info}")
-# except Exception as e:
-#     print(f"Caught an exception: {type(e)} - {e}")
-# finally:
-#     conn.close()
-#     print("Connection closed.")
-
-
-
-
     # ************* post/send to Anthropic API
-    claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
+    # claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
+    # why this new code? to stop the retries behaviour built-in to "requests" lib:
+    reqSess = requests.Session()
+    reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
+    claude_response = reqSess.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
+
     # *************
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
     logger.info(f">>> Anthropic's response: {claude_response}")
@@ -545,6 +502,11 @@ def chat_completions(oai_data):
                 "message": "An error occurred during streaming.",
             })
             yield f"data: {error_message}\n\n"
+        finally:
+            claude_response = None
+            # FIXME where to put this ?
+            # reqSess.close()
+            # print(f"generate_resp: reqSess.close().")
 
     end_time = time.perf_counter()
     logger.info(f"*** POST elapsed: {end_time - start_time:.6f} seconds")

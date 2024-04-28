@@ -242,7 +242,9 @@ class LogsDialog(wx.Dialog):
     def load_logs(self):
         # we need to get the name of the CHAT_LOG file via an api call:
         try:
-            response = requests.get(f"http://{config.HOST}:{config.PORT}/v1/chat_log")
+            reqSess = requests.Session()
+            reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
+            response = reqSess.get(f"http://{config.HOST}:{config.PORT}/v1/chat_log")
             response.raise_for_status()  # raise an exception for 4xx or 5xx status codes
             chat_data = response.json()
             chat_log = chat_data['chat_log']
@@ -251,6 +253,9 @@ class LogsDialog(wx.Dialog):
             logger.info(f"load_logs(self): Error occurred while making the API request: {e}")
         except (KeyError, TypeError, ValueError) as e:
             logger.info(f"load_logs(self): Error occurred while parsing the API response: {e}")
+        finally:
+            response = None
+            reqSess.close()
 
         if chat_log is None or not isinstance(chat_log, (str, bytes, os.PathLike)):
             logger.info(f"load_logs(self): No chat activity found in: {chat_log}")
@@ -371,7 +376,9 @@ class MenuStuff(TaskBarIcon):
             url = f"http://{config.HOST}:{config.PORT}/v1/ping"
             time.sleep(1) # otherwise a bizarre error with a blank "e" happens (why?)
             logger.info(f"Pinging: {url}")
-            response = requests.get(url, timeout=1)
+            reqSess = requests.Session()
+            reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
+            response = reqSess.get(url, timeout=1)
             logger.info(f"Ping status code: {response.status_code}")
             if response.status_code == 200:
                 APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}. The server is \"go at throttle up\"!"
@@ -384,6 +391,8 @@ class MenuStuff(TaskBarIcon):
                 APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
+        # so, yeah, i'm bored with doing "pretty" pythonista zen code, 
+        # therefore these "except"s are ugly" repetition, get over it!
         except requests.exceptions.Timeout:
             APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
             APP_STATUS_MESSAGES += f"Pinging "
@@ -399,9 +408,9 @@ class MenuStuff(TaskBarIcon):
             APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
-
-        # so, yeah, i'm bored with doing "pretty" pythonista zen code, 
-        # therefore the above "except"s are ugly" repetition, get over it!
+        finally:
+            response = None
+            reqSess.close()
 
         if not self.status_dialog or not self.status_dialog.IsShown():
             self.status_dialog = StatusDialog(None, f"{config.APP_NAME} Status Messages", APP_STATUS_MESSAGES)
@@ -435,10 +444,15 @@ class MenuStuff(TaskBarIcon):
             if SERVER_PROCESS:
                 stop_server()
                 SERVER_PROCESS = None
-            response = requests.get(url, timeout=1)
+            reqSess = requests.Session()
+            reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
+            response = reqSess.get(url, timeout=1)
         except Exception as e:
             # ok, the user wants out, exit/quit/whatever, so let them be free
             pass
+        finally:
+            response = None
+            reqSess.close()
 
         if hasattr(self, 'tray_icon') and self.tray_icon is not None:
             self.tray_icon.RemoveIcon()

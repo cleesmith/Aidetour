@@ -28,6 +28,8 @@ Server*
 build/
 dist/
 *.spec
+# to stop creation of __pycache__ do:
+# PYTHONDONTWRITEBYTECODE=1 python -B Aidetour.py
 __pycache__/
 
 # Shelve files:

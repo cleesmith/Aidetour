@@ -1,5 +1,9 @@
 # Mac and Windows version:
 # 
+# to stop creation of __pycache__ do:
+# PYTHONDONTWRITEBYTECODE=1 python -B Aidetour.py
+# 
+# 
 # python --version == Python 3.10
 # pip --version
 # pip 24.0 from /opt/miniconda3/envs/Aidetour/lib/python3.10/site-packages/pip (python 3.10)

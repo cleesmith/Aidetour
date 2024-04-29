@@ -1,6 +1,6 @@
 # Mac and Windows version:
 # 
-# to stop creation of __pycache__ do:
+# to stop creation of __pycache__ folder do this:
 # PYTHONDONTWRITEBYTECODE=1 python -B Aidetour.py
 # 
 # 

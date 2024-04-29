@@ -69,7 +69,6 @@ class MyTaskBarIcon(wx.adv.TaskBarIcon):
         menu = wx.Menu()
         status_item = menu.Append(wx.ID_ANY, "Status")
         menu.Append(wx.ID_ANY, "Settings")
-        # menu.Append(wx.ID_ANY, "Chat log")
         logs_item = menu.Append(wx.ID_ANY, "Chat log")
         menu.Append(wx.ID_ANY, "About")
         exit_item = menu.Append(wx.ID_EXIT, "Exit")
@@ -102,7 +101,7 @@ class MyTaskBarIcon(wx.adv.TaskBarIcon):
 
     def ping_server(self):
         try:
-            self.set_icon("status_down.png")
+            self.set_icon("Aidetour_red.png")
             reqSess = requests.Session()
             reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
             response = reqSess.get("http://127.0.0.1:5600/")
@@ -111,10 +110,10 @@ class MyTaskBarIcon(wx.adv.TaskBarIcon):
             print(f"ping_server: response={response.ok}")
             self.server_status = response.ok
             if self.server_status:
-                self.set_icon("status_up.png")
+                self.set_icon("Aidetour_green.png")
         except Exception as e:
             print(f"ping_server: an error occurred:\n\"{e}\"\n")
-            self.set_icon("status_down.png")
+            self.set_icon("Aidetour_red.png")
         finally:
             response = None
             reqSess.close()

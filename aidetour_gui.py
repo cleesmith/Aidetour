@@ -144,7 +144,7 @@ class SettingsDialog(wx.Dialog):
         vbox.AddSpacer(20)
 
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-        okButton = wx.Button(panel, label='Ok')
+        okButton = wx.Button(panel, label='Save')
         restartButton = wx.Button(panel, label='Restart Server')
         closeButton = wx.Button(panel, label='Cancel')
         hbox.Add(okButton, flag=wx.RIGHT, border=10)
@@ -370,36 +370,30 @@ class MenuStuff(TaskBarIcon):
         menu.Append(5, 'Exit')
         return menu
 
+    def set_icon(self, icon_path):
+        try:
+            icon = wx.Icon(icon_path, wx.BITMAP_TYPE_PNG)
+            self.SetIcon(icon, config.APP_NAME)
+        except Exception as e:
+            logger.info(f"ERROR: setting icon:\n\"{e}\"")
+
+    def on_left_down(self, event):
+        pass
+
     def OnStatus(self, event):
         global APP_STATUS_MESSAGES
+        url = f"http://{config.HOST}:{config.PORT}/v1/ping"
+        reqSess = requests.Session()
+        reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
         try:
-            url = f"http://{config.HOST}:{config.PORT}/v1/ping"
-            time.sleep(1) # otherwise a bizarre error with a blank "e" happens (why?)
-            logger.info(f"Pinging: {url}")
-            reqSess = requests.Session()
-            reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
+            self.set_icon("Aidetour_red.png")
             response = reqSess.get(url, timeout=1)
-            logger.info(f"Ping status code: {response.status_code}")
-            if response.status_code == 200:
+            self.server_status = response.ok
+            if self.server_status:
                 APP_STATUS_MESSAGES += f"Ping to http://{config.HOST}:{config.PORT}/v1/ping was successful;\nstatus code of {response.status_code}. The server is \"go at throttle up\"!"
                 logger.info(APP_STATUS_MESSAGES)
                 APP_STATUS_MESSAGES += "\n________________________________________\n"
-            else:
-                APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
-                APP_STATUS_MESSAGES += f"Pinging "
-                APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping failed with a status code of {response.status_code}. \"Oh no, the mains are offline\"!"
-                APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
-                logger.info(APP_STATUS_MESSAGES)
-                APP_STATUS_MESSAGES += "\n________________________________________\n"
-        # so, yeah, i'm bored with doing "pretty" pythonista zen code, 
-        # therefore these "except"s are ugly" repetition, get over it!
-        except requests.exceptions.Timeout:
-            APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
-            APP_STATUS_MESSAGES += f"Pinging "
-            APP_STATUS_MESSAGES += f"http://{config.HOST}:{config.PORT}/v1/ping timed out. \"A bridge too far\"!"
-            APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
-            logger.info(APP_STATUS_MESSAGES)
-            APP_STATUS_MESSAGES += "\n________________________________________\n"
+                self.set_icon("Aidetour_green.png")
         except Exception as e:
             APP_STATUS_MESSAGES += "\nError: API Server is not running:\n"
             APP_STATUS_MESSAGES += f"Pinging "
@@ -408,6 +402,7 @@ class MenuStuff(TaskBarIcon):
             APP_STATUS_MESSAGES += "\nPlease click on Settings in the menu to change."
             logger.info(APP_STATUS_MESSAGES)
             APP_STATUS_MESSAGES += "\n________________________________________\n"
+            self.set_icon("Aidetour_red.png")
         finally:
             response = None
             reqSess.close()
@@ -422,6 +417,7 @@ class MenuStuff(TaskBarIcon):
             self.settings_dialog = SettingsDialog(None, f"{config.APP_NAME} Settings")
             self.settings_dialog.Show()
             self.settings_dialog.Raise() # give it the focus
+            self.set_icon("Aidetour.png")
 
     def OnLogs(self, event):
         if not self.logs_dialog or not self.logs_dialog.IsShown():

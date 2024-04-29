@@ -240,19 +240,19 @@ class LogsDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self.OnClose)
     
     def load_logs(self):
-        # we need to get the name of the CHAT_LOG file via an api call:
+        # get the name of the CHAT_LOG file via an api call:
         try:
+            url = f"http://{config.HOST}:{config.PORT}/v1/chat_log"
+            timeout_config = (1, 1)  # connection and read timeouts
             reqSess = requests.Session()
             reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
-            response = reqSess.get(f"http://{config.HOST}:{config.PORT}/v1/chat_log")
-            response.raise_for_status()  # raise an exception for 4xx or 5xx status codes
+            response = reqSess.get(url, timeout=timeout_config)
+            # response.raise_for_status()  # raise an exception for 4xx or 5xx status codes
             chat_data = response.json()
             chat_log = chat_data['chat_log']
             logger.info(f"load_logs(self): chat_log={chat_log}")
-        except requests.exceptions.RequestException as e:
-            logger.info(f"load_logs(self): Error occurred while making the API request: {e}")
-        except (KeyError, TypeError, ValueError) as e:
-            logger.info(f"load_logs(self): Error occurred while parsing the API response: {e}")
+        except Exception as e:
+            logger.info(f"load_logs(self): Error occurred while parsing the API response:\n\"{e}\"")
         finally:
             response = None
             reqSess.close()
@@ -331,8 +331,14 @@ class MenuStuff(TaskBarIcon):
 
         # to check port in use or back ip use:
         #   python -m http.server 5600 --bind 127.0.0.1
-        # mac check listening:
+        # 
+        # Mac = show listening ports:
         #   lsof -iTCP -sTCP:LISTEN -P -n
+        #   kill 123
+        # 
+        # Windows = show listening ports:
+        #   netstat -aon | findstr LISTENING | findstr "127.0.0.1 0.0.0.0"
+        #   taskkill /F /PID 123
 
         if aidetour_utilities.is_port_in_use(config.HOST, config.PORT):
             self.app_warning()
@@ -340,9 +346,6 @@ class MenuStuff(TaskBarIcon):
             # this sets SERVER_PROCESS, so it can be terminated if needed:
             start_server()
             logger.info(f"MenuStuff: start_server(): SERVER_PROCESS={SERVER_PROCESS}")
-
-        # FIXME !!!!!!!!!!!!!
-        # SERVER_PROCESS = None
 
         if SERVER_PROCESS is None:
             APP_STATUS_MESSAGES += "\nError starting the API Server.\n"
@@ -387,6 +390,8 @@ class MenuStuff(TaskBarIcon):
         reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
         try:
             self.set_icon("Aidetour_red.png")
+            # a "ping" GET request to a local server will be fast, 
+            # so only wait for 1 second with no retries:
             response = reqSess.get(url, timeout=1)
             self.server_status = response.ok
             if self.server_status:
@@ -440,11 +445,13 @@ class MenuStuff(TaskBarIcon):
             if SERVER_PROCESS:
                 stop_server()
                 SERVER_PROCESS = None
+            timeout_config = (1, 1)  # connection and read timeouts
             reqSess = requests.Session()
             reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
-            response = reqSess.get(url, timeout=1)
+            response = reqSess.get(url, timeout=timeout_config)
         except Exception as e:
-            # ok, the user wants out, exit/quit/whatever, so let them be free
+            # ok, the user wants out (exit/quit/whatever) so let them be free,
+            # even though the api server may or may not have shutdown
             pass
         finally:
             response = None

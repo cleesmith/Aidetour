@@ -302,12 +302,14 @@ def chat_completions(oai_data):
 
     # ************* post/send to Anthropic API
     # claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
-    # why this new code? to stop the retries behaviour built-in to "requests" lib:
+    # 
+    # why the following new code = to stop the retries behaviour built-in to "requests" lib:
+    claude_timeout = 30
     reqSess = requests.Session()
     reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
-    claude_response = reqSess.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
-
+    claude_response = reqSess.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE, timeout=claude_timeout)
     # *************
+
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
     logger.info(f">>> Anthropic's response: {claude_response}")
 

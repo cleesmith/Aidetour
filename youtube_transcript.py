@@ -12,12 +12,18 @@ from langchain_community.document_loaders import YoutubeLoader
 # 	"https://www.youtube.com/live/Seu8KkqBY1k?si=cGrmdVArmk82UDOC",
 #   "https://www.youtube.com/live/oCq5QCbsdQ8?si=SrsfqE5Y31uE3x-o",
 # 	"https://www.youtube.com/live/-oPYGeAdgFI?si=_zj1PNkbjSExICQQ",
-	# "https://youtu.be/OaxUPuv1uOE?si=Nu43K6yKyh__rOtl",
+# 	"https://youtu.be/OaxUPuv1uOE?si=Nu43K6yKyh__rOtl",
+# 	"https://www.youtube.com/watch?v=KXzSPE1KHHs", # can't do private videos
 
+def count_words(text):
+    return len(text.split())
 
+def get_last_n_words(text, n):
+    words = text.split()
+    return " ".join(words[-n:])
 
 loader = YoutubeLoader.from_youtube_url(
-	"https://www.youtube.com/live/h5fjiNeRyIw?si=TUrUuuyfsKLuwdmP",
+	"https://www.youtube.com/live/EB26tIW-Gzg?si=7v-s1rWqx1BgrviP",
 	add_video_info=True,
 	language=["en", "es"],
 	translation="en",
@@ -26,7 +32,9 @@ loader = YoutubeLoader.from_youtube_url(
 docs = loader.load()
 
 if len(docs) > 0:
-    print(docs[0].page_content)
-    print("Length of docs:", len(docs[0].page_content))
+	print(docs[0].page_content)
+	print("Length of docs:", len(docs[0].page_content))
+	print(f"Word count: {count_words(docs[0].page_content)}")
 else:
     print("docs is empty")
+

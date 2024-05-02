@@ -2,7 +2,7 @@ import os
 from groq import Groq
 
 client = Groq(
-    api_key="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",
+    api_key="",
 )
 
 stream = client.chat.completions.create(

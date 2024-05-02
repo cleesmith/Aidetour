@@ -11,7 +11,7 @@ import aidetour_utilities
 # an alias to 'config.' instead of 'aidetour_utilities.'
 import aidetour_utilities as config 
 
-server_log = aidetour_utilities.prepend_home_dir(config.SERVER_LOG)
+server_log = aidetour_utilities.prepend_log_dir(config.SERVER_LOG)
 setup_logger(server_log)
 
 if __name__ == '__main__':

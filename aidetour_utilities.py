@@ -35,29 +35,28 @@ DEFAULT_MODEL = "claude-3-haiku-20240307"
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 
 
-# def get_log_dir():
-#     # Get the user's home directory
-#     home_dir = os.path.expanduser("~")
-#     # Define the log directory name
-#     log_dir = os.path.join(home_dir, "aidetour_logs")
-#     try:
-#         # Try to create the 'aidetour_logs' directory if it doesn't exist
-#         if not os.path.exists(log_dir):
-#             os.makedirs(log_dir)
-#         return log_dir
-#     except Exception as e:
-#         print(f"Warning: Unable to create directory '{log_dir}'. Reason: {e}")
-#         print(f"Logs will be written directly to the user's home directory '{home_dir}' instead.")
-#         return home_dir
-
-# # Usage
-# log_directory = get_log_dir()
-# print(f"Log files will be saved in: {log_directory}")
-
-
 def prepend_home_dir(filename):
     users_home = os.path.expanduser('~') # while different, this works for all
     return os.path.join(users_home, filename)
+
+def prepend_log_dir(filename):
+    log_home = get_log_dir()
+    return os.path.join(log_home, filename)
+
+def get_log_dir():
+    # get the user's home directory
+    home_dir = os.path.expanduser("~")
+    # define the log directory name
+    log_dir = os.path.join(home_dir, "aidetour_logs")
+    try:
+        # try to create the 'aidetour_logs' directory if it doesn't exist
+        if not os.path.exists(log_dir):
+            os.makedirs(log_dir)
+        return log_dir
+    except Exception as e:
+        logger.info(f"Warning: Unable to create directory '{log_dir}'. Reason:\n{e}")
+        logger.info(f"Logs will be written directly to the user's home directory '{home_dir}' instead.")
+        return home_dir
 
 def set_chat_log():
     global CHAT_LOG
@@ -65,9 +64,7 @@ def set_chat_log():
     timestamp_milliseconds = int(time.time() * 1000)
     current_datetime = datetime.now()
     chat_log_name = f"{timestamp_milliseconds}_{APP_NAME}_Chat_log_{current_datetime.strftime('%Y_%m_%d')}_{current_datetime.strftime('%H%M%S')}.txt"
-    # users_home = os.path.expanduser('~') # while different, this works for all platforms
-    # CHAT_LOG = os.path.join(users_home, chat_log_name)
-    CHAT_LOG = prepend_home_dir(chat_log_name)
+    CHAT_LOG = prepend_log_dir(chat_log_name)
     logger.info(f"aidetour_utilities: set_chat_log(): CHAT_LOG={CHAT_LOG}")
     if not os.path.exists(CHAT_LOG):
         with open(CHAT_LOG, 'a+') as file:

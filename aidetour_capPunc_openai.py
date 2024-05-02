@@ -3,7 +3,7 @@ import time
 import openai
 from openai import OpenAI
 
-client = OpenAI(api_key='sk-proj-6fXrkIcZXPKvu5grz3AXT3BlbkFJeSn3yQrySE7PDJ4fu6AK')
+client = OpenAI(api_key='')
 
 def count_words(text):
     return len(text.split())

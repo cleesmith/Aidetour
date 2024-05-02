@@ -35,6 +35,27 @@ DEFAULT_MODEL = "claude-3-haiku-20240307"
 ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 
 
+# def get_log_dir():
+#     # Get the user's home directory
+#     home_dir = os.path.expanduser("~")
+#     # Define the log directory name
+#     log_dir = os.path.join(home_dir, "aidetour_logs")
+    
+#     try:
+#         # Try to create the 'aidetour_logs' directory if it doesn't exist
+#         if not os.path.exists(log_dir):
+#             os.makedirs(log_dir)
+#         return log_dir
+#     except Exception as e:
+#         print(f"Warning: Unable to create directory '{log_dir}'. Reason: {e}")
+#         print(f"Logs will be written directly to the user's home directory '{home_dir}' instead.")
+#         return home_dir
+
+# # Usage
+# log_directory = get_log_dir()
+# print(f"Log files will be saved in: {log_directory}")
+
+
 def prepend_home_dir(filename):
     users_home = os.path.expanduser('~') # while different, this works for all
     return os.path.join(users_home, filename)

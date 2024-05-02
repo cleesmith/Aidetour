@@ -40,7 +40,6 @@ ANTHROPIC_MESSAGES_API_URL = 'https://api.anthropic.com/v1/messages'
 #     home_dir = os.path.expanduser("~")
 #     # Define the log directory name
 #     log_dir = os.path.join(home_dir, "aidetour_logs")
-    
 #     try:
 #         # Try to create the 'aidetour_logs' directory if it doesn't exist
 #         if not os.path.exists(log_dir):

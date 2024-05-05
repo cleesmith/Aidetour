@@ -3,6 +3,13 @@ import re
 import time
 import traceback
 
+
+client = Groq(
+    api_key="",
+    timeout=120.0,
+    max_retries=0
+)
+
 total_start_time = time.time()
 
 def transcribe_text(text, chunk_size=1000, overlap_size=150):
@@ -17,41 +24,24 @@ def transcribe_text(text, chunk_size=1000, overlap_size=150):
         overlap_end = min(len(words), chunk_end + overlap_size)
         prompt_words = " ".join(words[:overlap_end])
 
-        # prompt = (
-        #     f"Transcribe the following raw text verbatim, preserving all words and their order. "
-        #     f"Add appropriate capitalization, punctuation, and sentence boundaries as needed for proper English, "
-        #     f"but do not add, remove, or modify any words. "
-        #     f"Please only respond with your transcribed text with no comments/descriptions or double quotes:"
-        #     f"for example, do not do this:"
-        #     f"\"Here is the transcribed text with proper capitalization, punctuation, and sentence boundaries: \""
-        #     f"Never do this: \"Here is the transcribed text:\""
-        #     f"Now, this is the raw text to be transcribed:\n\n"
-        #     f"{prompt_words}"
-        # )
-
         prompt = (
 """
 Transcribe the following raw text verbatim, preserving all words and their order. 
 Add appropriate capitalization, punctuation, and sentence boundaries as needed for 
 proper English, but do not add, remove, or modify any words. Please provide only 
-the transcribed text, without any additional comments, headers, or annotations. 
-Do not include any phrases such as "Here is the transcribed text:" or similar.
+the transcribed text that was sent to you. 
+Please enclose and surround your responses with these tags: <TheEnd></TheEnd>.
 """
 )
         prompt += f"\nThe raw text to be transcribed:\n\n{prompt_words}"
 
         try:
-            client = Groq(
-                api_key="",
-                timeout=120.0,
-                max_retries=0
-            )
-
             # print(f"\n#{text_loop}: prompt to API:\n{prompt}\n")
 
             start_time = time.time()
             response = client.chat.completions.create(
-                model="llama3-70b-8192",
+                model="llama3-8b-8192",
+                # model="llama3-70b-8192", # Groq
                 messages=[
                     {"role": "system", 
                         "content": 
@@ -60,7 +50,8 @@ Do not include any phrases such as "Here is the transcribed text:" or similar.
                     {"role": "user", "content": prompt}
                 ],
                 max_tokens=1500,
-                temperature=0
+                temperature=0,
+                stream=False
             )
             end_time = time.time()
             elapsed_time = end_time - start_time
@@ -75,7 +66,7 @@ Do not include any phrases such as "Here is the transcribed text:" or similar.
             processed_words_count = len(prompt_words.split())
             remaining_text = " ".join(words[processed_words_count:])
             text_loop += 1
-            time.sleep(1) # slow down to avoid rate limit
+            time.sleep(2) # slow down to avoid rate limit
         except Exception as e:
             print(f"\n{'*'*60}\nError: except Exception as e:\n{e}\n{'*'*60}\n")
             traceback.print_exc()  # Prints the full stack trace with line numbers

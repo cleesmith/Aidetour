@@ -10,13 +10,13 @@ def get_last_n_words(text, n):
 
 client = anthropic.Client(api_key="")
 
-with client.messages.stream(
-    max_tokens=1024,
-    messages=[{"role": "user", "content": "Hello"}],
-    model="claude-3-opus-20240229",
-) as stream:
-  for text in stream.text_stream:
-      print(text, end="", flush=True)
+# with client.messages.stream(
+#     max_tokens=1024,
+#     messages=[{"role": "user", "content": "Hello"}],
+#     model="claude-3-opus-20240229",
+# ) as stream:
+#   for text in stream.text_stream:
+#       print(text, end="", flush=True)
 
 def generate_response(client, messages):
     print(f"generate_response: messages:\n{'*'*70}\n{messages}\n{'*'*70}\n")

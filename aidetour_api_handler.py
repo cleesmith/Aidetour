@@ -75,16 +75,9 @@ CORS(flask_app, resources=r'/v1/*', supports_credentials=True)
 
 def run_flask_app(cli=False):
     aidetour_utilities.load_settings()
-
     aidetour_utilities.set_chat_log()
 
     aidetour_utilities.log_app_settings(logger)
-
-    # when in terminal/cmd use SERVER_LOG instead of APP_LOG:
-    if config.APP_MODE == "cli":
-        print(f"APP_NAME: {config.APP_NAME} APP_MODE: {config.APP_MODE}\nmore details/errors in server log: {config.SERVER_LOG}\nchat logged in: {config.CHAT_LOG}\n")
-        server_log = aidetour_utilities.prepend_home_dir(config.SERVER_LOG)
-        setup_logger(server_log)
 
     try:
         try:

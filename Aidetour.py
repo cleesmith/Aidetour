@@ -61,6 +61,7 @@ from datetime import datetime, timezone
 
 # Aidetour modules:
 import aidetour_logging
+from aidetour_logging import setup_logger
 import aidetour_api_handler
 import aidetour_utilities
 # an alias to 'config.' instead of 'aidetour_utilities.'
@@ -68,6 +69,7 @@ import aidetour_utilities as config
 
 
 def run_gui_version():
+    logger.info(f"Starting {config.APP_NAME}...")
     aidetour_utilities.set_app_mode('gui')
     import aidetour_gui
     logger.info("GUI launched...")
@@ -75,10 +77,9 @@ def run_gui_version():
     app.MainLoop()
 
 def run_cli_version():
-    # for app usage in terminal (Mac/Linux) or cmd (Windows):
+    # for app usage in "terminal" (Mac/Linux) or "cmd" (Windows):
     aidetour_utilities.set_app_mode('cli')
-    logger.info(f"{config.APP_NAME}: CLI mode launched using settings in: {config.APP_SETTINGS_LOCATION}to run API server on: http://{config.HOST}:{config.PORT}")
-    print(f"{config.APP_NAME}: CLI mode launched using settings in:\n{config.APP_SETTINGS_LOCATION}\nto run API server on: http://{config.HOST}:{config.PORT}")
+    print(f"{config.APP_NAME}: CLI mode launched using settings in:\n{config.APP_SETTINGS_LOCATION}\nRunning local API server on: http://{config.HOST}:{config.PORT}\nSee logs in: {aidetour_utilities.get_log_dir()}")
     aidetour_api_handler.run_flask_app(True)
 
 def signal_handler(sig, frame):
@@ -92,11 +93,6 @@ if __name__ == '__main__':
     # register the signal handler for SIGINT = Ctrl-C
     signal.signal(signal.SIGINT, signal_handler)
 
-    from aidetour_logging import setup_logger
-    app_log = aidetour_utilities.prepend_log_dir(config.APP_LOG)
-    setup_logger(app_log)
-    logger.info(f"Starting {config.APP_NAME}...")
-
     # FIXME 
     #   ask AI for a command line way to allow user to edit Settings
     parser = argparse.ArgumentParser(description=f"{config.APP_NAME} with Mac/Windows GUI or CLI terminal mode.")
@@ -105,6 +101,10 @@ if __name__ == '__main__':
 
     aidetour_utilities.load_settings()
     APP_MODE = "gui" # default
+
+    from aidetour_logging import setup_logger
+    app_log = aidetour_utilities.prepend_log_dir(config.APP_LOG)
+    setup_logger(app_log)
 
     if args.cli:
         run_cli_version()

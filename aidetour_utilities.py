@@ -23,7 +23,6 @@ APP_MODE = "gui" # or "cli"
 APP_LOGO = "Aidetour.png"
 APP_SPLASH = 'aidetour_splash_wx.py'
 APP_LOG = "Log_aidetour.txt"
-SERVER_LOG = "Server_log_aidetour.txt"
 CHAT_LOG = None
 RUN_SERVER = 'aidetour_run_server.py'
 APP_SETTINGS_LOCATION = None
@@ -89,7 +88,6 @@ def log_app_settings(logger):
     logger.info(f"APP_SPLASH: {APP_SPLASH}")
     logger.info(f"APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     logger.info(f"APP_LOG: {APP_LOG}")
-    logger.info(f"SERVER_LOG: {SERVER_LOG}")
     logger.info(f"CHAT_LOG: {CHAT_LOG}")
     logger.info(f"RUN_SERVER: {RUN_SERVER}")
     logger.info(f"HOST: {HOST}")
@@ -102,20 +100,10 @@ def log_app_settings(logger):
 
 def set_app_settings_location():
     global APP_SETTINGS_LOCATION
-    # define the user's home directory for each platform:
-    # if platform.system() == 'Windows':
-    #     APP_SETTINGS_LOCATION = os.path.expanduser('~')
-    # elif platform.system() == 'Darwin':  # macOS
-    #     APP_SETTINGS_LOCATION = os.path.expanduser('~/Documents/Aidetour')
-    # else:  # Linux
-    #     APP_SETTINGS_LOCATION = os.path.expanduser('~/.config')
-
     settings_db_name = f"{APP_NAME}_Settings.json"
-    # users_home = os.path.expanduser('~') # while different, this works for all
-    # settings_location = os.path.join(users_home, settings_db_name)
     settings_location = prepend_home_dir(settings_db_name)
     APP_SETTINGS_LOCATION = settings_location
-    logger.info(f"set_app_settings_location: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
+    # logger.info(f"set_app_settings_location: APP_SETTINGS_LOCATION: {APP_SETTINGS_LOCATION}")
     return APP_SETTINGS_LOCATION
 
 def create_default_settings_db():

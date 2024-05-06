@@ -92,7 +92,6 @@ def log_app_settings(logger):
     logger.info(f"RUN_SERVER: {RUN_SERVER}")
     logger.info(f"HOST: {HOST}")
     logger.info(f"PORT: {PORT}")
-    # don't show user's api key in log files:
     logger.info(f"ANTHROPIC_API_KEY: [redacted]")
     logger.info(f"ANTHROPIC_API_MODELS: {ANTHROPIC_API_MODELS}")
     logger.info(f"ANTHROPIC_MESSAGES_API_URL: {ANTHROPIC_MESSAGES_API_URL}")

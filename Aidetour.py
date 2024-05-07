@@ -4,6 +4,14 @@
 # PYTHONDONTWRITEBYTECODE=1 python -B Aidetour.py
 # 
 # 
+# prep for PyPi:
+# pip install --upgrade setuptools wheel
+# python setup.py sdist bdist_wheel
+# pip install twine
+# twine upload dist/*
+# 
+# 
+# 
 # python --version == Python 3.10
 # pip --version
 # pip 24.0 from /opt/miniconda3/envs/Aidetour/lib/python3.10/site-packages/pip (python 3.10)
@@ -26,7 +34,7 @@
 #
 # Mac:
 # cd Aidetour
-# conda activate Aidetour
+# conda activate Aidetour python=3.10.14
 # python Aidetour.py
 # 
 # Windows:

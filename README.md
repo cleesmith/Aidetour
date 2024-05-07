@@ -12,10 +12,13 @@ directly with the Anthropic Claude API behind the scenes.
 ## Key Features
 
 - Seamless integration between OpenAI API and Anthropic Claude API
-- Support for multiple Claude models (e.g., Claude-3-Opus, Claude-3-Sonnet, Claude-3-Haiku)
+- Support for multiple Claude models:
+  - Opus: claude-3-opus-20240229
+  - Sonnet: claude-3-sonnet-20240229
+  - Haiku: claude-3-haiku-20240307
 - Graphical user interface (GUI) for both macOS and Windows
 - Command-line interface (CLI) mode for terminal usage
-- A chat log of your requests and Claude's responses, as pairs of "Me:" and "AI:"
+- A chat log of your requests and Claudes responses, as pairs of "Me:" and "AI:"
 - Logging functionality for tracking application events and errors
 
 ## Installation

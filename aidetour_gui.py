@@ -216,9 +216,9 @@ class SettingsDialog(wx.Dialog):
         self.Destroy()
 
 
-class LogsDialog(wx.Dialog):
+class ChatLogDialog(wx.Dialog):
     def __init__(self, parent, title):
-        super(LogsDialog, self).__init__(parent, title=title, size=(720, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        super(ChatLogDialog, self).__init__(parent, title=title, size=(720, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         
         panel = wx.Panel(self)
         vbox = wx.BoxSizer(wx.VERTICAL)
@@ -235,11 +235,11 @@ class LogsDialog(wx.Dialog):
         
         panel.SetSizer(vbox)
         
-        self.load_logs()
+        self.load_chat_log()
         
         self.Bind(wx.EVT_CLOSE, self.OnClose)
     
-    def load_logs(self):
+    def load_chat_log(self):
         # get the name of the CHAT_LOG file via an api call:
         try:
             url = f"http://{config.HOST}:{config.PORT}/v1/chat_log"
@@ -250,15 +250,15 @@ class LogsDialog(wx.Dialog):
             # response.raise_for_status()  # raise an exception for 4xx or 5xx status codes
             chat_data = response.json()
             chat_log = chat_data['chat_log']
-            logger.info(f"load_logs(self): chat_log={chat_log}")
+            logger.info(f"load_chat_log(self): chat_log={chat_log}")
         except Exception as e:
-            logger.info(f"load_logs(self): Error occurred while parsing the API response:\n\"{e}\"")
+            logger.info(f"load_chat_log(self): Error occurred while parsing the API response:\n\"{e}\"")
         finally:
             response = None
             reqSess.close()
 
         if chat_log is None or not isinstance(chat_log, (str, bytes, os.PathLike)):
-            logger.info(f"load_logs(self): No chat activity found in: {chat_log}")
+            logger.info(f"load_chat_log(self): No chat activity found in: {chat_log}")
             self.log_text.SetValue(f"No chat activity found in: {chat_log}")
         else:
             try:
@@ -271,6 +271,48 @@ class LogsDialog(wx.Dialog):
             except Exception as e:
                 logger.info(f"load_logs(self): except Exception as e:\n{str(e)}")
                 self.log_text.SetValue(f"Error loading log file: {str(e)}")
+
+    def OnClose(self, event):
+        self.Destroy()
+    
+    def OnDone(self, event):
+        self.Destroy()
+
+
+class LogsDialog(wx.Dialog):
+    def __init__(self, parent, title):
+        super(LogsDialog, self).__init__(parent, title=title, size=(720, 400), style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
+        
+        panel = wx.Panel(self)
+        vbox = wx.BoxSizer(wx.VERTICAL)
+        
+        self.log_text = wx.TextCtrl(panel, style=wx.TE_MULTILINE | wx.TE_READONLY)
+        font = wx.Font(16, wx.FONTFAMILY_MODERN, wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL)
+        self.log_text.SetFont(font)
+        vbox.Add(self.log_text, 1, wx.EXPAND | wx.ALL, 10)
+        
+        done_button = wx.Button(panel, label="Done")
+        done_button.Bind(wx.EVT_BUTTON, self.OnDone)
+        vbox.Add(done_button, 0, wx.ALIGN_CENTER | wx.BOTTOM, 10)
+        
+        panel.SetSizer(vbox)
+        
+        self.load_logs()
+        
+        self.Bind(wx.EVT_CLOSE, self.OnClose)
+    
+    def load_logs(self):
+        app_log = aidetour_utilities.prepend_log_dir(config.APP_LOG)
+        try:
+            with open(app_log, "r") as file:
+                logs = file.read()
+                self.log_text.SetValue(logs)
+        except FileNotFoundError:
+            logger.info(f"load_logs(self): except FileNotFoundError")
+            self.log_text.SetValue(f"{app_log} file not found.")
+        except Exception as e:
+            logger.info(f"load_logs(self): except Exception as e:\n{str(e)}")
+            self.log_text.SetValue(f"Error loading log file: {str(e)}")
 
     def OnClose(self, event):
         self.Destroy()
@@ -356,21 +398,24 @@ class MenuStuff(TaskBarIcon):
         # these 'state control attributes' are used to avoid multiple popups of the same dialog box:
         self.status_dialog   = None
         self.settings_dialog = None
+        self.chat_log_dialog     = None
         self.logs_dialog     = None
         self.video_dialog    = None
         self.Bind(wx.EVT_MENU, self.OnStatus,   id=1)
         self.Bind(wx.EVT_MENU, self.OnSettings, id=2)
-        self.Bind(wx.EVT_MENU, self.OnLogs,     id=3)
-        self.Bind(wx.EVT_MENU, self.OnVideo,    id=4)
-        self.Bind(wx.EVT_MENU, self.OnExit,     id=5)
+        self.Bind(wx.EVT_MENU, self.OnChatLog,  id=3)
+        self.Bind(wx.EVT_MENU, self.OnLogs,     id=4)
+        self.Bind(wx.EVT_MENU, self.OnVideo,    id=5)
+        self.Bind(wx.EVT_MENU, self.OnExit,     id=6)
 
     def CreatePopupMenu(self):
         menu = wx.Menu()
         menu.Append(1, 'Status')
         menu.Append(2, 'Settings')
         menu.Append(3, 'Chat log')
-        menu.Append(4, 'About')
-        menu.Append(5, 'Exit')
+        menu.Append(4, 'Logs')
+        menu.Append(5, 'About')
+        menu.Append(6, 'Exit')
         return menu
 
     def set_icon(self, icon_path):
@@ -424,9 +469,15 @@ class MenuStuff(TaskBarIcon):
             self.settings_dialog.Raise() # give it the focus
             self.set_icon("Aidetour.png")
 
+    def OnChatLog(self, event):
+        if not self.chat_log_dialog or not self.chat_log_dialog.IsShown():
+            self.chat_log_dialog = ChatLogDialog(None, f"{config.APP_NAME} Chat Log")
+            self.chat_log_dialog.Show()
+            self.chat_log_dialog.Raise() # give it the focus
+
     def OnLogs(self, event):
         if not self.logs_dialog or not self.logs_dialog.IsShown():
-            self.logs_dialog = LogsDialog(None, f"{config.APP_NAME} Chat Log")
+            self.logs_dialog = LogsDialog(None, f"{config.APP_NAME} Logs")
             self.logs_dialog.Show()
             self.logs_dialog.Raise() # give it the focus
 

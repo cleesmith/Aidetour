@@ -35,7 +35,7 @@ as Waitress can run on various operating systems, including Windows.
 Overall, using Flask and Waitress together provides a smooth development-to-production pipeline 
 and adheres to the principle of using the best tool for each job.
 
-to check port in use or back ip use:
+To make the desired port to be "in use" for testing:
 python -m http.server 5600 --bind 127.0.0.1
 """
 # API Flask Anthropic related:

@@ -39,7 +39,8 @@ def start_server():
     logger.info(f"Attempting to start API Server on {config.HOST}:{config.PORT}\nSERVER_PROCESS={SERVER_PROCESS}")
 
 def stop_server():
-    logger.info(f"Attempting to stop API Server process on platform {sys.platform}.")
+    # not needed, plus it's out of place in the log:
+    # logger.info(f"Attempting to stop API Server process on platform {sys.platform}.")
     if sys.platform == 'win32':
         SERVER_PROCESS.terminate()
     else:
@@ -490,7 +491,8 @@ class MenuStuff(TaskBarIcon):
 
     def OnExit(self, event=None):
         url = f"http://{config.HOST}:{config.PORT}/v1/shutdown"
-        logger.info(f"Shutdown server at {url}")
+        # not needed, plus appears in wrong place in log:
+        # logger.info(f"Shutdown server at {url}")
         try:
             global SERVER_PROCESS
             if SERVER_PROCESS:

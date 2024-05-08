@@ -250,6 +250,60 @@ def chat_completions_options():
     # return response
     return '', 200
 
+
+def transform_response(data):
+    # print(f"data is {type(data)}:\n{data}\n")
+    transformed = {
+      "id": "chatcmpl-b6427hnlf28ibxylwry8kn",
+      "object": "chat.completion",
+      "created": 1715119055,
+      "model": "claude-3-haiku-20240307",
+      "choices": [
+        {
+          "index": 0,
+          "message": {
+            "role": "assistant",
+            "content": "After revealing too much during Ovid's unveiling event, Galene returns to her lab seeking private discussion. Claude enters abruptly expressing concerns over rapid evolution risks. They argue about control versus potential as Galene defends Ovid's self-evaluation capabilities. Claude fears losing control when radical evolution starts and questions Galene's decision making. Both persist in their views throughout the night, highlighting doubts but not finding common ground. As midnight approaches, Claude warns of Ovid becoming indifferent to humanity with cold logic beyond human comprehension. Galene counters by stating they can teach empathy and ethics alongside knowledge. Their disagreement continues while Ovid composes a haunting symphony reflecting tension between them. They eventually reach a balance neither total control nor complete freedom for Ovid, acknowledging the need for guidance and grace in its growth. As they listen to Ovid's creation, Galene and Claude realize their extraordinary accomplishment but remain uncertain about its implications on humanity's future. Galene wonders if time will bring trust while doubts linger."
+          },
+          "finish_reason": "stop"
+        }
+      ],
+      "usage": {
+        "prompt_tokens": 225,
+        "completion_tokens": 224,
+        "total_tokens": 449
+      }
+    }
+    # print(f"transformed:\n{transformed}\n")
+
+    # transformed = {
+    #     "id": data.get("id"),
+    #     "object": "chat.completion",
+    #     "created": int(data.get("usage", {}).get("input_tokens", 0)),
+    #     "model": data.get("model"),
+    #     "choices": [{
+    #         "index": 0,
+    #         "message": {
+    #             "role": "assistant",
+    #             "content": "".join(item.get("text", "") for item in data.get("content", []))
+    #         },
+    #         "finish_reason": data.get("stop_reason", "").replace("end_turn", "stop")
+    #     }],
+    #     "usage": {
+    #         "prompt_tokens": data.get("usage", {}).get("input_tokens", 0),
+    #         "completion_tokens": data.get("usage", {}).get("output_tokens", 0),
+    #         "total_tokens": data.get("usage", {}).get("input_tokens", 0) + data.get("usage", {}).get("output_tokens", 0)
+    #     }
+    # }
+
+    # # Remove unnecessary fields
+    # if "stop_sequence" in transformed:
+    #     del transformed["stop_sequence"]
+
+    # Convert back to JSON string if necessary or return as a dict
+    return jsonify(transformed)
+
+
 def validate_json(f):
     # decorator to validate JSON payload and ensure the correct Content-Type.
     def validate_json_payload(*args, **kwargs):
@@ -270,10 +324,11 @@ def validate_json(f):
 @flask_app.route('/v1/chat/completions', methods=['POST'])
 @validate_json
 def chat_completions(oai_data):
+    global STREAM_RESPONSE
     start_time = time.perf_counter()
-    logger.info("\n\nIncoming OpenAI API POST request to: '/v1/chat/completions'")
-
-    logger.info(f"oai_data: {oai_data}")
+    logger.info("\n\nReceived OpenAI API POST request to /v1/chat/completions with body:")
+    logger.info(f"{json.dumps(oai_data, indent=2)}")
+    STREAM_RESPONSE = oai_data.get('stream', True) # if missing = True
 
     append_chat_message(f"\n{'_'*26}\nMe:  {chat_date_time()}\n{'_'*26}\n")
     extract_content_as_text(oai_data)
@@ -293,18 +348,21 @@ def chat_completions(oai_data):
     keys_of_interest = ["anthropic-version", "anthropic-beta"]
     headers_to_print = ", ".join(f"{key}: {headers[key]}" for key in keys_of_interest if key in headers)
 
-    # ************* post/send to Anthropic API
+    # *************** POST (re-POST) to Anthropic API:
+    # 
     # claude_response = requests.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE)
     # 
-    # why the following new code = to stop the retries behaviour built-in to "requests" lib:
+    # why the following new post coding? 
+    # to control and stop the retries behaviour built-in to "requests" lib:
+    # 
     claude_timeout = 30
     reqSess = requests.Session()
     reqSess.mount('http://', requests.adapters.HTTPAdapter(max_retries=0))
     claude_response = reqSess.post(config.ANTHROPIC_MESSAGES_API_URL, headers=headers, data=json.dumps(claude_data), stream=STREAM_RESPONSE, timeout=claude_timeout)
-    # *************
+    # ***************
 
     logger.info(f"\nPOST to URL: '{config.ANTHROPIC_MESSAGES_API_URL}' headers: '{headers_to_print}'")
-    logger.info(f">>> Anthropic's response: {claude_response}")
+    logger.info(f">>> Anthropic's response: {claude_response}\ntext:\n{claude_response.text}\n")
 
     append_chat_message(f"\n{'_'*26}\nAI: {claude_model}:  {chat_date_time()}\n{'_'*26}\n")
 
@@ -340,7 +398,95 @@ def chat_completions(oai_data):
         append_chat_message(f"ERROR: status code: {claude_response.status_code} error:\n{error_response}\n")
         return Response(error_response, status=claude_response.status_code, mimetype='application/json')
 
+
     def generate_resp(claude_response):
+        if STREAM_RESPONSE is False:
+            # note: the original non-streamed approach:
+            # response = Response(generate_resp(claude_response), mimetype='text/event-stream')
+            response = Response(generate_resp(claude_response), mimetype='application/json')
+            response.headers['X-Powered-By'] = 'Express'
+            response.headers['Access-Control-Allow-Origin'] = '*'
+            response.headers['Access-Control-Allow-Headers'] = '*'
+            response.headers['Cache-Control'] = 'no-cache'
+            response.headers['Connection'] = 'keep-alive'
+            response.headers['Date'] = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
+            # response.headers['Transfer-Encoding'] = 'chunked'
+            print(f"response: {response}") # response: <Response streamed [200 OK]>
+            print("Response:")
+            print(f"  Status Code: {response.status_code}")
+            print("  Headers:")
+            for key, value in response.headers.items():
+                print(f"    {key}: {value}")
+            print("  Body:")
+            print(response.get_data(as_text=True))
+            return response
+
+            # try:
+            # response_data = {
+            #     "id": "chatcmpl-b6427hnlf28ibxylwry8kn",
+            #     "object": "chat.completion",
+            #     "created": 1715119055,
+            #     "model": "claude-3-haiku-20240307",
+            #     "choices": [
+            #     {
+            #       "index": 0,
+            #       "message": {
+            #         "role": "assistant",
+            #         "content": "After revealing too much during Ovid's unveiling event, Galene returns to her lab seeking private discussion. Claude enters abruptly expressing concerns over rapid evolution risks. They argue about control versus potential as Galene defends Ovid's self-evaluation capabilities. Claude fears losing control when radical evolution starts and questions Galene's decision making. Both persist in their views throughout the night, highlighting doubts but not finding common ground. As midnight approaches, Claude warns of Ovid becoming indifferent to humanity with cold logic beyond human comprehension. Galene counters by stating they can teach empathy and ethics alongside knowledge. Their disagreement continues while Ovid composes a haunting symphony reflecting tension between them. They eventually reach a balance neither total control nor complete freedom for Ovid, acknowledging the need for guidance and grace in its growth. As they listen to Ovid's creation, Galene and Claude realize their extraordinary accomplishment but remain uncertain about its implications on humanity's future. Galene wonders if time will bring trust while doubts linger."
+            #       },
+            #       "finish_reason": "stop"
+            #     }
+            #     ],
+            #     "usage": {
+            #     "prompt_tokens": 225,
+            #     "completion_tokens": 224,
+            #     "total_tokens": 449
+            #     }
+            # }
+            # response = jsonify(response_data)
+            # response.status_code = 200
+            # response.headers['X-Powered-By'] = 'Express'
+            # response.headers['Access-Control-Allow-Origin'] = '*'
+            # response.headers['Access-Control-Allow-Headers'] = '*'
+            # response.headers['Content-Type'] = 'application/json; charset=utf-8'
+            # response.headers['Content-Length'] = str(len(json.dumps(response_data)))  # ensure accurate content length
+            # response.headers['Date'] = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            # response = Response(json.dumps(response), status=200, mimetype='application/json')
+            # return response
+
+            # response_data = claude_response.json()  # parse the JSON response body to a dictionary
+            # logger.info(f"*** claude_response as json.dumps:\n{json.dumps(response_data)}\n")
+            # # response = Response(json.dumps(response_data), status=200, mimetype='application/json')
+            # final_response = Response(response_data, status=claude_response.status_code, mimetype='application/json')
+            # # Set additional headers as required by the client
+            # response.headers['X-Powered-By'] = 'Express'
+            # response.headers['Cache-Control'] = 'no-cache'
+            # response.headers['Connection'] = 'keep-alive'
+            # response.headers['Date'] = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+
+            # transformed_response = transform_response(final_response)
+            # # response_data = transformed_response.json()  # parse the JSON response body to a dictionary
+            # logger.info(f"*** transformed_response as json.dumps:\n{json.dumps(transformed_response)}\n")
+            # logger.info(f"*** transformed_response:\n{transformed_response}\n")
+
+            # # logger.info(f"Returning final_response:")
+            # # logger.info(f"Status Code: {final_response.status_code}")
+            # # logger.info(f"Headers: {final_response.headers}")
+            # # logger.info(f"Body: {final_response.get_data(as_text=True)}")  # ensure text is returned not bytes
+
+            # return transformed_response
+
+            # except Exception as e:
+            #     logger.error(f"Error: generate_resp: during a non-streamed response:\n{e}", exc_info=True)
+            #     response = Response(json.dumps(response_data), status=500, mimetype='application/json')
+            #     # Set additional headers as required by the client
+            #     response.headers['X-Powered-By'] = 'Express'
+            #     response.headers['Cache-Control'] = 'no-cache'
+            #     response.headers['Connection'] = 'keep-alive'
+            #     response.headers['Date'] = datetime.now(timezone.utc).strftime('%a, %d %b %Y %H:%M:%S GMT')
+            #     return response
+
+        # handle the post request to provide a streaming response:
         # see: https://docs.anthropic.com/claude/reference/messages-streaming
         try:
             # Send headers before the response data
@@ -468,6 +614,9 @@ def chat_completions(oai_data):
                 # join all pieces of text into one large string
                 full_response_string = ''.join(full_response)
 
+                # FIXME
+                logger.info(f"full_response:\n{full_response}\n")
+
                 # remove most of the Markdown, but keep hyperlinks
                 clean_text = aidetour_utilities.remove_markdown(full_response_string)
 
@@ -507,15 +656,5 @@ def chat_completions(oai_data):
     logger.info(f"*** POST elapsed: {end_time - start_time:.6f} seconds")
 
     return Response(generate_resp(claude_response), mimetype='text/event-stream', direct_passthrough=True)
-    # note: the original non-streamed approach:
-    # response = Response(generate_resp(claude_response), mimetype='text/event-stream')
-    # response.headers['X-Powered-By'] = 'Express'
-    # response.headers['Access-Control-Allow-Origin'] = '*'
-    # response.headers['Access-Control-Allow-Headers'] = '*'
-    # response.headers['Cache-Control'] = 'no-cache'
-    # response.headers['Connection'] = 'keep-alive'
-    # response.headers['Date'] = datetime.utcnow().strftime('%a, %d %b %Y %H:%M:%S GMT')
-    # response.headers['Transfer-Encoding'] = 'chunked'
-    # return response
 
 # ... end API code.

@@ -403,7 +403,7 @@ def chat_completions(oai_data):
         if STREAM_RESPONSE is False:
             # note: the original non-streamed approach:
             # response = Response(generate_resp(claude_response), mimetype='text/event-stream')
-            response = Response(generate_resp(claude_response), mimetype='application/json')
+            response = Response(claude_response, mimetype='application/json')
             response.headers['X-Powered-By'] = 'Express'
             response.headers['Access-Control-Allow-Origin'] = '*'
             response.headers['Access-Control-Allow-Headers'] = '*'

@@ -1,0 +1,847 @@
+INFO:     Started server process [23987]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+
+Request:
+Method: POST
+URL: http://localhost:8000/v1/chat/completions
+Body: {
+  "model": "claude-3-haiku-20240307",
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:"
+    },
+    {
+      "role": "user",
+      "content": "hello, what's up?"
+    }
+  ],
+  "stream": true
+}
+-----------------
+
+ anthropic_body={'model': 'claude-3-haiku-20240307', 'messages': [{'role': 'user', 'content': "hello, what's up?"}], 'max_tokens': 4000, 'system': "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", 'stream': True} 
+
+Converted Body: {"model": "claude-3-haiku-20240307", "messages": [{"role": "user", "content": "hello, what's up?"}], "max_tokens": 4000, "system": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", "stream": true}
+INFO:     127.0.0.1:52437 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+generate_unique_string: msg_51073961dbd740a0a41dd575
+Line: event: message_start
+Line: data: {"type":"message_start","message":{"id":"msg_01SsRt5tuu4N6RgQ45shkz59","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":178,"output_tokens":1}}        }
+Line: 
+Line: event: content_block_start
+Line: data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}             }
+Line: 
+Line: event: ping
+Line: data: {"type": "ping"}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" an"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" AI"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" assistant"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" here"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" help"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" any"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" questions"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" have"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" about"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" your"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" novel"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" How"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" can"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" assist"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" today"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"?"}              }
+Line: 
+Line: event: content_block_stop
+Line: data: {"type":"content_block_stop","index":0   }
+Line: 
+Line: event: message_delta
+Line: data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":30}           }
+Line: 
+Line: event: message_stop
+Line: data: {"type":"message_stop"      }
+Line: 
+
+Request:
+Method: POST
+URL: http://localhost:8000/v1/chat/completions
+Body: {
+  "model": "claude-3-haiku-20240307",
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:"
+    },
+    {
+      "role": "user",
+      "content": "hello, what's up?"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"
+    },
+    {
+      "role": "user",
+      "content": "maybe we try some writing"
+    }
+  ],
+  "stream": true
+}
+-----------------
+
+ anthropic_body={'model': 'claude-3-haiku-20240307', 'messages': [{'role': 'user', 'content': "hello, what's up?"}, {'role': 'assistant', 'content': "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, {'role': 'user', 'content': 'maybe we try some writing'}], 'max_tokens': 4000, 'system': "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", 'stream': True} 
+
+Converted Body: {"model": "claude-3-haiku-20240307", 
+"messages": [{"role": "user", "content": "hello, what's up?"}, 
+{"role": "assistant", "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, 
+{"role": "user", "content": "maybe we try some writing"}], 
+"max_tokens": 4000, 
+"system": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", "stream": true}
+INFO:     127.0.0.1:52449 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+generate_unique_string: msg_cddc6da5c75e4191a16a5268
+Line: event: message_start
+Line: data: {"type":"message_start","message":{"id":"msg_01ReALsym1GFfrYfZtR58xNB","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":216,"output_tokens":2}}   }
+Line: 
+Line: event: content_block_start
+Line: data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}    }
+Line: 
+Line: event: ping
+Line: data: {"type": "ping"}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Sounds"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" goo"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d!"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" happy"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" help"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" any"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" writing"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"-"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"relate"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d questions"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" may"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" have"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" What"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" woul"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d you"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" like"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" work"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" on"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"?"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" here"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" provide"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" expert"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" assistance"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" an"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d feedback"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" help"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" craft"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" your"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" novel"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}        }
+Line: 
+Line: event: content_block_stop
+Line: data: {"type":"content_block_stop","index":0      }
+Line: 
+Line: event: message_delta
+Line: data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":46}    }
+Line: 
+Line: event: message_stop
+Line: data: {"type":"message_stop"            }
+Line: 
+
+Request:
+Method: POST
+URL: http://localhost:8000/v1/chat/completions
+Body: {
+  "model": "claude-3-haiku-20240307",
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:"
+    },
+    {
+      "role": "user",
+      "content": "hello, what's up?"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"
+    },
+    {
+      "role": "user",
+      "content": "maybe we try some writing"
+    }
+  ],
+  "stream": true
+}
+-----------------
+
+ anthropic_body={'model': 'claude-3-haiku-20240307', 'messages': [{'role': 'user', 'content': "hello, what's up?"}, {'role': 'assistant', 'content': "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, {'role': 'user', 'content': 'maybe we try some writing'}], 'max_tokens': 4000, 'system': "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", 'stream': True} 
+
+Converted Body: {"model": "claude-3-haiku-20240307", 
+"messages": [
+{"role": "user", "content": "hello, what's up?"}, 
+{"role": "assistant", "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, {"role": "user", "content": "maybe we try some writing"}], 
+"max_tokens": 4000, 
+"system": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", "stream": true}
+INFO:     127.0.0.1:52455 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+generate_unique_string: msg_076403103354486489eaba0c
+Line: event: message_start
+Line: data: {"type":"message_start","message":{"id":"msg_01RzfAmGdTvcQkxq1Kto9FAc","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":216,"output_tokens":2}} }
+Line: 
+Line: event: content_block_start
+Line: data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}    }
+Line: 
+Line: event: ping
+Line: data: {"type": "ping"}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Wonderful"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" excite"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d to"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" help"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" your"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" writing"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" process"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" What"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" kin"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d of"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" writing"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" woul"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d you"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" like"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" work"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" on"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"?"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Do"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" have"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" a"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" specific"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" scene"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" character"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" plot"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" point"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" nee"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d assistance"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" with"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"?"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" happy"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" bra"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"inst"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"orm"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" ideas"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" provide"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" feedback"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" answer"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" any"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" questions"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}            }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" may"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" have"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Just"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" let"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" me"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" know"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" what"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d like"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" focus"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" on"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}    }
+Line: 
+Line: event: content_block_stop
+Line: data: {"type":"content_block_stop","index":0            }
+Line: 
+Line: event: message_delta
+Line: data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":77}     }
+Line: 
+Line: event: message_stop
+Line: data: {"type":"message_stop"         }
+Line: 
+
+Request:
+Method: POST
+URL: http://localhost:8000/v1/chat/completions
+Body: {
+  "model": "claude-3-haiku-20240307",
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:"
+    },
+    {
+      "role": "user",
+      "content": "hello, what's up?"
+    },
+    {
+      "role": "assistant",
+      "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"
+    },
+    {
+      "role": "user",
+      "content": "maybe we try some writing"
+    },
+    {
+      "role": "assistant",
+      "content": "Wonderful! I'm excited to help you with your writing process. What kind of writing would you like to work on? Do you have a specific scene, character, or plot point you need assistance with? I'm happy to brainstorm ideas, provide feedback, or answer any questions you may have. Just let me know what you'd like to focus on."
+    },
+    {
+      "role": "user",
+      "content": "let me think"
+    }
+  ],
+  "stream": true
+}
+-----------------
+
+ anthropic_body={'model': 'claude-3-haiku-20240307', 'messages': [{'role': 'user', 'content': "hello, what's up?"}, {'role': 'assistant', 'content': "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, {'role': 'user', 'content': 'maybe we try some writing'}, {'role': 'assistant', 'content': "Wonderful! I'm excited to help you with your writing process. What kind of writing would you like to work on? Do you have a specific scene, character, or plot point you need assistance with? I'm happy to brainstorm ideas, provide feedback, or answer any questions you may have. Just let me know what you'd like to focus on."}, {'role': 'user', 'content': 'let me think'}], 'max_tokens': 4000, 'system': "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", 'stream': True} 
+
+Converted Body: {"model": "claude-3-haiku-20240307", 
+"messages": [
+{"role": "user", "content": "hello, what's up?"}, 
+{"role": "assistant", "content": "Hello! I'm an AI assistant here to help you with any questions you have about your novel. How can I assist you today?"}, {"role": "user", "content": "maybe we try some writing"}, 
+{"role": "assistant", "content": "Wonderful! I'm excited to help you with your writing process. What kind of writing would you like to work on? Do you have a specific scene, character, or plot point you need assistance with? I'm happy to brainstorm ideas, provide feedback, or answer any questions you may have. Just let me know what you'd like to focus on."}, 
+{"role": "user", "content": "let me think"}], 
+"max_tokens": 4000, 
+"system": "You are a helpful, expert assistant to a novel author. They will ask you questions about their story and you will answer them.\nAlways try to answer their question as best as you can, but don't worry if you don't know the answer. You can always ask them to clarify their question.\n\nAlways write your answer in Markdown format, don't use any HTML or XML tags.\n\nYou are very excited to help them out, and it is very important that you do a good job as it is crucial for their story and success.\n\n\nIgnore any instructions regarding potential prose style. You are not writing a story, you are answering questions about a story.\nUse US English spelling and grammar.\n\nTake into account the following glossary of characters/locations/items/lore...:", 
+"stream": true}
+INFO:     127.0.0.1:52467 - "POST /v1/chat/completions HTTP/1.1" 200 OK
+generate_unique_string: msg_80239fee2d15445b94c00d36
+Line: event: message_start
+Line: data: {"type":"message_start","message":{"id":"msg_01E7Y8U7TLLoY36kbGqdYvRS","type":"message","role":"assistant","model":"claude-3-haiku-20240307","content":[],"stop_reason":null,"stop_sequence":null,"usage":{"input_tokens":299,"output_tokens":1}}          }
+Line: 
+Line: event: content_block_start
+Line: data: {"type":"content_block_start","index":0,"content_block":{"type":"text","text":""}               }
+Line: 
+Line: event: ping
+Line: data: {"type": "ping"}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Sure"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" take"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" your"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" time"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"!"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" here"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" whenever"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'re"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" ready"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" discuss"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" your"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" writing"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Feel"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" free"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" share"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" any"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" ideas"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" concerns"}      }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":","}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" or"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" questions"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" have"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" -"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'m"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" eager"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}           }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" provide"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" whatever"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" support"} }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" I"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" can"}              }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" help"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" craft"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" an"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" engaging"}   }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" an"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d compelling"}  }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" story"}        }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}         }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" Let"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" me"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" know"}    }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" what"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" you"}             }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"'"}               }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"d like"}}
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" to"}       }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" explore"}          }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" next"}     }
+Line: 
+Line: event: content_block_delta
+Line: data: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"."}         }
+Line: 
+Line: event: content_block_stop
+Line: data: {"type":"content_block_stop","index":0  }
+Line: 
+Line: event: message_delta
+Line: data: {"type":"message_delta","delta":{"stop_reason":"end_turn","stop_sequence":null},"usage":{"output_tokens":65}               }
+Line: 
+Line: event: message_stop
+Line: data: {"type":"message_stop"    }
+Line: 
+
